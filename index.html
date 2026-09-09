@@ -12,7 +12,7 @@
       font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
       background: #0f0f1a;
       color: #fff;
-      padding-bottom: 220px;
+      padding-bottom: 240px;
     }
     header {
       background: #1a1a2e;
@@ -23,10 +23,7 @@
       top: 0;
       z-index: 100;
     }
-    header h1 {
-      font-size: 1.5rem;
-      color: #e94560;
-    }
+    header h1 { font-size: 1.5rem; color: #e94560; }
     header p { font-size: 0.85rem; color: #aaa; margin-top: 4px; }
 
     .products {
@@ -40,15 +37,9 @@
       border-radius: 12px;
       padding: 14px 10px;
       text-align: center;
-      border: 2px solid transparent;
-      transition: 0.2s;
     }
     .product:active { transform: scale(0.96); }
-    .product h3 {
-      font-size: 0.95rem;
-      margin-bottom: 6px;
-      line-height: 1.3;
-    }
+    .product h3 { font-size: 0.95rem; margin-bottom: 6px; line-height: 1.3; }
     .product .price {
       color: #e94560;
       font-weight: bold;
@@ -66,7 +57,6 @@
       font-weight: 600;
     }
 
-    /* Cart */
     .cart-panel {
       position: fixed;
       bottom: 0;
@@ -76,7 +66,7 @@
       border-top: 3px solid #e94560;
       padding: 12px 16px 20px;
       z-index: 200;
-      max-height: 45vh;
+      max-height: 48vh;
       overflow-y: auto;
     }
     .cart-header {
@@ -86,11 +76,7 @@
       margin-bottom: 10px;
     }
     .cart-header h2 { font-size: 1.1rem; }
-    .total {
-      font-size: 1.4rem;
-      font-weight: bold;
-      color: #e94560;
-    }
+    .total { font-size: 1.4rem; font-weight: bold; color: #e94560; }
     .cart-items { margin-bottom: 12px; }
     .cart-item {
       display: flex;
@@ -143,7 +129,6 @@
       font-size: 0.9rem;
     }
 
-    /* Modal History */
     .modal {
       display: none;
       position: fixed;
@@ -214,7 +199,6 @@
   </div>
 
   <script>
-    // ========== PRODUK CONTOH (boleh edit di sini) ==========
     const products = [
       { id: 1, name: "Nasi Lemak", price: 5.00 },
       { id: 2, name: "Mee Goreng", price: 6.00 },
@@ -230,7 +214,6 @@
 
     let cart = [];
 
-    // Render produk
     function renderProducts() {
       const container = document.getElementById('products');
       container.innerHTML = products.map(p => `
@@ -319,7 +302,6 @@
         total: total
       };
 
-      // Simpan ke localStorage
       let sales = JSON.parse(localStorage.getItem('denyanya_sales') || '[]');
       sales.unshift(sale);
       localStorage.setItem('denyanya_sales', JSON.stringify(sales));
@@ -340,7 +322,7 @@
           <div class="sale-item">
             <strong>${sale.date}</strong><br>
             ${sale.method} • RM ${sale.total.toFixed(2)}<br>
-            <small>\( {sale.items.map(i => ` \){i.name} x${i.qty}`).join(', ')}</small>
+            <small>${sale.items.map(i => i.name + ' x' + i.qty).join(', ')}</small>
           </div>
         `).join('');
       }
