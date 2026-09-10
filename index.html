@@ -1,659 +1,168 @@
 <!DOCTYPE html>
 <html lang="ms">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-  <meta name="apple-mobile-web-app-capable" content="yes">
-  <meta name="theme-color" content="#E67E22">
-  <title>De Nya Nya - Kasir</title>
-  <style>
-    * { box-sizing: border-box; margin: 0; padding: 0; }
-    body {
-      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
-      background: #FFF8F0;
-      color: #1a1a1a;
-      padding-bottom: 280px;
-    }
-    header {
-      background: #fff;
-      padding: 18px 16px;
-      text-align: center;
-      border-bottom: 3px solid #E67E22;
-      position: sticky;
-      top: 0;
-      z-index: 100;
-      box-shadow: 0 2px 8px rgba(0,0,0,0.06);
-    }
-    header h1 {
-      font-size: 1.7rem;
-      color: #1a1a1a;
-      font-weight: 800;
-      letter-spacing: -0.5px;
-    }
-    header h1 span { color: #E67E22; }
-
-    .stats {
-      display: grid;
-      grid-template-columns: 1fr 1fr 1fr;
-      gap: 10px;
-      padding: 12px;
-      background: #fff;
-    }
-    .stat-box {
-      background: #FFF8F0;
-      border-radius: 12px;
-      padding: 10px 6px;
-      text-align: center;
-      border: 1px solid #f0e6d8;
-    }
-    .stat-box .label { font-size: 0.72rem; color: #888; }
-    .stat-box .value { font-size: 0.95rem; font-weight: 700; color: #E67E22; margin-top: 3px; }
-
-    .products {
-      display: grid;
-      grid-template-columns: repeat(auto-fill, minmax(145px, 1fr));
-      gap: 12px;
-      padding: 14px;
-    }
-    .product {
-      background: #fff;
-      border-radius: 14px;
-      padding: 14px 10px;
-      text-align: center;
-      box-shadow: 0 2px 8px rgba(0,0,0,0.05);
-      border: 1px solid #f0e6d8;
-    }
-    .product:active { transform: scale(0.97); }
-    .product h3 { font-size: 0.95rem; margin-bottom: 6px; line-height: 1.3; color: #1a1a1a; }
-    .product .price {
-      color: #E67E22;
-      font-weight: 700;
-      font-size: 1.1rem;
-      margin-bottom: 10px;
-    }
-    .product button {
-      background: #E67E22;
-      color: white;
-      border: none;
-      padding: 8px 14px;
-      border-radius: 10px;
-      font-size: 0.9rem;
-      width: 100%;
-      font-weight: 600;
-    }
-
-    .cart-panel {
-      position: fixed;
-      bottom: 0;
-      left: 0;
-      right: 0;
-      background: #fff;
-      border-top: 3px solid #E67E22;
-      padding: 12px 14px 18px;
-      z-index: 200;
-      max-height: 46vh;
-      overflow-y: auto;
-      box-shadow: 0 -4px 20px rgba(0,0,0,0.08);
-    }
-    .cart-header {
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-      margin-bottom: 10px;
-    }
-    .cart-header h2 { font-size: 1.1rem; color: #1a1a1a; }
-    .total { font-size: 1.35rem; font-weight: 800; color: #E67E22; }
-    .cart-items { margin-bottom: 10px; }
-    .cart-item {
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-      padding: 8px 0;
-      border-bottom: 1px solid #f0e6d8;
-      font-size: 0.92rem;
-    }
-    .qty-controls {
-      display: flex;
-      align-items: center;
-      gap: 10px;
-    }
-    .qty-controls button {
-      width: 32px;
-      height: 32px;
-      border-radius: 50%;
-      border: none;
-      background: #E67E22;
-      color: white;
-      font-size: 1.1rem;
-      font-weight: bold;
-    }
-    .actions {
-      display: grid;
-      grid-template-columns: 1fr 1fr;
-      gap: 10px;
-      margin-top: 10px;
-    }
-    .actions button {
-      padding: 13px;
-      border: none;
-      border-radius: 12px;
-      font-size: 0.95rem;
-      font-weight: 600;
-      color: white;
-    }
-    .btn-cash { background: #27ae60; }
-    .btn-qr { background: #2980b9; }
-    .btn-clear { background: #7f8c8d; grid-column: span 2; }
-    .bottom-btns {
-      display: grid;
-      grid-template-columns: 1fr 1fr;
-      gap: 8px;
-      margin-top: 8px;
-    }
-    .bottom-btns button {
-      padding: 11px;
-      border: none;
-      border-radius: 10px;
-      font-size: 0.85rem;
-      color: #555;
-      background: #f5f0e8;
-      font-weight: 500;
-    }
-
-    /* Modal */
-    .modal {
-      display: none;
-      position: fixed;
-      inset: 0;
-      background: rgba(0,0,0,0.5);
-      z-index: 300;
-      padding: 16px;
-      overflow-y: auto;
-    }
-    .modal-content {
-      background: #fff;
-      border-radius: 18px;
-      padding: 22px;
-      max-width: 420px;
-      margin: 40px auto;
-      box-shadow: 0 10px 40px rgba(0,0,0,0.15);
-      text-align: center;
-    }
-    .modal h2 { margin-bottom: 16px; color: #E67E22; font-size: 1.25rem; }
-    .modal .amount {
-      font-size: 1.8rem;
-      font-weight: 800;
-      color: #1a1a1a;
-      margin: 10px 0 20px;
-    }
-    .modal input {
-      width: 100%;
-      padding: 14px;
-      font-size: 1.3rem;
-      text-align: center;
-      border: 2px solid #E67E22;
-      border-radius: 12px;
-      margin-bottom: 16px;
-    }
-    .change-box {
-      background: #FFF8F0;
-      border-radius: 12px;
-      padding: 14px;
-      margin: 12px 0 20px;
-      border: 1px solid #f0e6d8;
-    }
-    .change-box .label { font-size: 0.9rem; color: #666; }
-    .change-box .value {
-      font-size: 1.6rem;
-      font-weight: 800;
-      color: #27ae60;
-      margin-top: 4px;
-    }
-    .qr-image {
-      width: 220px;
-      height: 220px;
-      margin: 10px auto 20px;
-      background: #f5f5f5;
-      border-radius: 12px;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      border: 2px dashed #ccc;
-    }
-    .qr-image img {
-      width: 200px;
-      height: 200px;
-      object-fit: contain;
-    }
-    .btn-confirm {
-      background: #27ae60;
-      color: white;
-      border: none;
-      padding: 14px;
-      width: 100%;
-      border-radius: 12px;
-      font-size: 1.05rem;
-      font-weight: 600;
-      margin-top: 8px;
-    }
-    .btn-cancel {
-      background: #eee;
-      color: #555;
-      border: none;
-      padding: 12px;
-      width: 100%;
-      border-radius: 12px;
-      font-size: 0.95rem;
-      margin-top: 10px;
-    }
-    .sale-item, .product-edit-item {
-      background: #FFF8F0;
-      padding: 12px;
-      border-radius: 12px;
-      margin-bottom: 10px;
-      font-size: 0.9rem;
-      border: 1px solid #f0e6d8;
-      text-align: left;
-    }
-    .sale-item .top, .product-edit-item .top {
-      display: flex;
-      justify-content: space-between;
-      align-items: flex-start;
-      gap: 8px;
-    }
-    .btn-del {
-      background: #e74c3c;
-      color: white;
-      border: none;
-      padding: 6px 11px;
-      border-radius: 8px;
-      font-size: 0.8rem;
-    }
-    .close-btn, .save-btn {
-      background: #E67E22;
-      color: white;
-      border: none;
-      padding: 13px;
-      width: 100%;
-      border-radius: 12px;
-      margin-top: 14px;
-      font-size: 1rem;
-      font-weight: 600;
-    }
-    .save-btn { background: #27ae60; }
-    .empty { text-align: center; color: #999; padding: 24px; }
-    .form-group { margin-bottom: 14px; text-align: left; }
-    .form-group label { display: block; font-size: 0.85rem; color: #666; margin-bottom: 5px; }
-    .form-group input {
-      width: 100%;
-      padding: 11px;
-      border-radius: 10px;
-      border: 1px solid #ddd;
-      background: #fff;
-      color: #1a1a1a;
-      font-size: 1rem;
-      text-align: left;
-    }
-    .form-actions {
-      display: grid;
-      grid-template-columns: 1fr 1fr;
-      gap: 10px;
-      margin-top: 8px;
-    }
-  </style>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="theme-color" content="#E67E22">
+<title>De Nya Nya</title>
+<style>
+*{box-sizing:border-box;margin:0;padding:0}
+body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,sans-serif;background:#FFF8F0;color:#1a1a1a;padding-bottom:280px}
+header{background:#fff;padding:18px 16px;text-align:center;border-bottom:3px solid #E67E22;position:sticky;top:0;z-index:100;box-shadow:0 2px 8px rgba(0,0,0,.06)}
+header h1{font-size:1.7rem;color:#1a1a1a;font-weight:800}
+header h1 span{color:#E67E22}
+.stats{display:grid;grid-template-columns:1fr 1fr 1fr;gap:10px;padding:12px;background:#fff}
+.stat-box{background:#FFF8F0;border-radius:12px;padding:10px 6px;text-align:center;border:1px solid #f0e6d8}
+.stat-box .label{font-size:.72rem;color:#888}
+.stat-box .value{font-size:.95rem;font-weight:700;color:#E67E22;margin-top:3px}
+.products{display:grid;grid-template-columns:repeat(auto-fill,minmax(145px,1fr));gap:12px;padding:14px}
+.product{background:#fff;border-radius:14px;padding:14px 10px;text-align:center;box-shadow:0 2px 8px rgba(0,0,0,.05);border:1px solid #f0e6d8}
+.product:active{transform:scale(.97)}
+.product h3{font-size:.95rem;margin-bottom:6px;line-height:1.3}
+.product .price{color:#E67E22;font-weight:700;font-size:1.1rem;margin-bottom:10px}
+.product button{background:#E67E22;color:#fff;border:none;padding:8px 14px;border-radius:10px;font-size:.9rem;width:100%;font-weight:600}
+.cart-panel{position:fixed;bottom:0;left:0;right:0;background:#fff;border-top:3px solid #E67E22;padding:12px 14px 18px;z-index:200;max-height:46vh;overflow-y:auto;box-shadow:0 -4px 20px rgba(0,0,0,.08)}
+.cart-header{display:flex;justify-content:space-between;align-items:center;margin-bottom:10px}
+.cart-header h2{font-size:1.1rem}
+.total{font-size:1.35rem;font-weight:800;color:#E67E22}
+.cart-items{margin-bottom:10px}
+.cart-item{display:flex;justify-content:space-between;align-items:center;padding:8px 0;border-bottom:1px solid #f0e6d8;font-size:.92rem}
+.qty-controls{display:flex;align-items:center;gap:10px}
+.qty-controls button{width:32px;height:32px;border-radius:50%;border:none;background:#E67E22;color:#fff;font-size:1.1rem;font-weight:bold}
+.actions{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-top:10px}
+.actions button{padding:13px;border:none;border-radius:12px;font-size:.95rem;font-weight:600;color:#fff}
+.btn-cash{background:#27ae60}
+.btn-qr{background:#2980b9}
+.btn-clear{background:#7f8c8d;grid-column:span 2}
+.bottom-btns{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-top:8px}
+.bottom-btns button{padding:11px;border:none;border-radius:10px;font-size:.85rem;color:#555;background:#f5f0e8;font-weight:500}
+.modal{display:none;position:fixed;inset:0;background:rgba(0,0,0,.5);z-index:300;padding:16px;overflow-y:auto}
+.modal-content{background:#fff;border-radius:18px;padding:22px;max-width:420px;margin:40px auto;box-shadow:0 10px 40px rgba(0,0,0,.15);text-align:center}
+.modal h2{margin-bottom:16px;color:#E67E22;font-size:1.25rem}
+.modal .amount{font-size:1.8rem;font-weight:800;margin:10px 0 20px}
+.modal input{width:100%;padding:14px;font-size:1.3rem;text-align:center;border:2px solid #E67E22;border-radius:12px;margin-bottom:16px}
+.change-box{background:#FFF8F0;border-radius:12px;padding:14px;margin:12px 0 20px;border:1px solid #f0e6d8}
+.change-box .label{font-size:.9rem;color:#666}
+.change-box .value{font-size:1.6rem;font-weight:800;color:#27ae60;margin-top:4px}
+.qr-image{width:220px;height:220px;margin:10px auto 20px;background:#f5f5f5;border-radius:12px;display:flex;align-items:center;justify-content:center;border:2px dashed #ccc}
+.qr-image img{width:200px;height:200px;object-fit:contain}
+.btn-confirm{background:#27ae60;color:#fff;border:none;padding:14px;width:100%;border-radius:12px;font-size:1.05rem;font-weight:600;margin-top:8px}
+.btn-cancel{background:#eee;color:#555;border:none;padding:12px;width:100%;border-radius:12px;font-size:.95rem;margin-top:10px}
+.sale-item,.product-edit-item{background:#FFF8F0;padding:12px;border-radius:12px;margin-bottom:10px;font-size:.9rem;border:1px solid #f0e6d8;text-align:left}
+.sale-item .top,.product-edit-item .top{display:flex;justify-content:space-between;align-items:flex-start;gap:8px}
+.btn-del{background:#e74c3c;color:#fff;border:none;padding:6px 11px;border-radius:8px;font-size:.8rem}
+.close-btn,.save-btn{background:#E67E22;color:#fff;border:none;padding:13px;width:100%;border-radius:12px;margin-top:14px;font-size:1rem;font-weight:600}
+.save-btn{background:#27ae60}
+.empty{text-align:center;color:#999;padding:24px}
+.form-group{margin-bottom:14px;text-align:left}
+.form-group label{display:block;font-size:.85rem;color:#666;margin-bottom:5px}
+.form-group input{width:100%;padding:11px;border-radius:10px;border:1px solid #ddd;background:#fff;color:#1a1a1a;font-size:1rem;text-align:left}
+.form-actions{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-top:8px}
+</style>
 </head>
 <body>
-  <header>
-    <h1>DE <span>NYA</span> NYA.</h1>
-  </header>
-
-  <div class="stats">
-    <div class="stat-box">
-      <div class="label">Hari Ini</div>
-      <div class="value" id="todayTotal">RM 0.00</div>
-    </div>
-    <div class="stat-box">
-      <div class="label">Bulan Ini</div>
-      <div class="value" id="monthTotal">RM 0.00</div>
-    </div>
-    <div class="stat-box">
-      <div class="label">Keseluruhan</div>
-      <div class="value" id="allTotal">RM 0.00</div>
-    </div>
+<header><h1>DE <span>NYA</span> NYA.</h1></header>
+<div class="stats">
+  <div class="stat-box"><div class="label">Hari Ini</div><div class="value" id="todayTotal">RM 0.00</div></div>
+  <div class="stat-box"><div class="label">Bulan Ini</div><div class="value" id="monthTotal">RM 0.00</div></div>
+  <div class="stat-box"><div class="label">Keseluruhan</div><div class="value" id="allTotal">RM 0.00</div></div>
+</div>
+<div class="products" id="products"></div>
+<div class="cart-panel">
+  <div class="cart-header"><h2>Cart</h2><div class="total">RM <span id="total">0.00</span></div></div>
+  <div class="cart-items" id="cart-items"><div class="empty">Cart kosong</div></div>
+  <div class="actions">
+    <button class="btn-cash" onclick="startCashPayment()">Bayar Cash</button>
+    <button class="btn-qr" onclick="startQRPayment()">Bayar QR</button>
+    <button class="btn-clear" onclick="clearCart()">Kosongkan Cart</button>
   </div>
-
-  <div class="products" id="products"></div>
-
-  <div class="cart-panel">
-    <div class="cart-header">
-      <h2>Cart</h2>
-      <div class="total">RM <span id="total">0.00</span></div>
-    </div>
-    <div class="cart-items" id="cart-items">
-      <div class="empty">Cart kosong</div>
-    </div>
-    <div class="actions">
-      <button class="btn-cash" onclick="startCashPayment()">Bayar Cash</button>
-      <button class="btn-qr" onclick="startQRPayment()">Bayar QR</button>
-      <button class="btn-clear" onclick="clearCart()">Kosongkan Cart</button>
-    </div>
-    <div class="bottom-btns">
-      <button onclick="showHistory()">Sejarah Jualan</button>
-      <button onclick="showProductManager()">Urus Produk</button>
-    </div>
+  <div class="bottom-btns">
+    <button onclick="showHistory()">Sejarah Jualan</button>
+    <button onclick="showProductManager()">Urus Produk</button>
   </div>
+</div>
 
-  <!-- Modal Cash Payment -->
-  <div class="modal" id="cashModal">
-    <div class="modal-content">
-      <h2>Bayar Cash</h2>
-      <div class="amount">Jumlah: RM <span id="cashTotal">0.00</span></div>
-      
-      <label style="font-size:0.9rem;color:#666;">Customer bayar berapa?</label>
-      <input type="number" id="amountReceived" placeholder="0.00" step="0.10" inputmode="decimal">
-      
-      <div class="change-box" id="changeBox" style="display:none;">
-        <div class="label">Baki yang perlu diberi</div>
-        <div class="value" id="changeAmount">RM 0.00</div>
-      </div>
-
-      <button class="btn-confirm" onclick="confirmCashPayment()">Sahkan Pembayaran</button>
-      <button class="btn-cancel" onclick="closeModal('cashModal')">Batal</button>
+<div class="modal" id="cashModal">
+  <div class="modal-content">
+    <h2>Bayar Cash</h2>
+    <div class="amount">Jumlah: RM <span id="cashTotal">0.00</span></div>
+    <label style="font-size:.9rem;color:#666">Customer bayar berapa?</label>
+    <input type="number" id="amountReceived" placeholder="0.00" step="0.10" inputmode="decimal">
+    <div class="change-box" id="changeBox" style="display:none">
+      <div class="label">Baki yang perlu diberi</div>
+      <div class="value" id="changeAmount">RM 0.00</div>
     </div>
+    <button class="btn-confirm" onclick="confirmCashPayment()">Sahkan Pembayaran</button>
+    <button class="btn-cancel" onclick="closeModal('cashModal')">Batal</button>
   </div>
+</div>
 
-  <!-- Modal QR Payment -->
-  <div class="modal" id="qrModal">
-    <div class="modal-content">
-      <h2>Bayar QR</h2>
-      <div class="amount">Jumlah: RM <span id="qrTotal">0.00</span></div>
-      
-      <div class="qr-image">
-        <!-- Ganti src ni dengan QR code sebenar kau nanti -->
-        <img src="https://api.qrserver.com/v1/create-qr-code/?size=200x200&data=DeNyaNya-Payment" alt="QR Code">
-      </div>
-      <p style="font-size:0.85rem;color:#666;margin-bottom:16px;">Imbas QR di atas untuk bayar</p>
-
-      <button class="btn-confirm" onclick="confirmQRPayment()">Sahkan Pembayaran</button>
-      <button class="btn-cancel" onclick="closeModal('qrModal')">Batal</button>
+<div class="modal" id="qrModal">
+  <div class="modal-content">
+    <h2>Bayar QR</h2>
+    <div class="amount">Jumlah: RM <span id="qrTotal">0.00</span></div>
+    <div class="qr-image">
+      <img src="https://api.qrserver.com/v1/create-qr-code/?size=200x200&data=DeNyaNya-Payment" alt="QR">
     </div>
+    <p style="font-size:.85rem;color:#666;margin-bottom:16px">Imbas QR di atas untuk bayar</p>
+    <button class="btn-confirm" onclick="confirmQRPayment()">Sahkan Pembayaran</button>
+    <button class="btn-cancel" onclick="closeModal('qrModal')">Batal</button>
   </div>
+</div>
 
-  <!-- Modal Sejarah -->
-  <div class="modal" id="historyModal">
-    <div class="modal-content" style="text-align:left;">
-      <h2>Sejarah Jualan</h2>
-      <div id="historyList"></div>
-      <button class="btn-del" style="width:100%;margin-top:12px;padding:11px;" onclick="clearAllSales()">Padam Semua Jualan</button>
-      <button class="close-btn" onclick="closeModal('historyModal')">Tutup</button>
+<div class="modal" id="historyModal">
+  <div class="modal-content" style="text-align:left">
+    <h2>Sejarah Jualan</h2>
+    <div id="historyList"></div>
+    <button class="btn-del" style="width:100%;margin-top:12px;padding:11px" onclick="clearAllSales()">Padam Semua Jualan</button>
+    <button class="close-btn" onclick="closeModal('historyModal')">Tutup</button>
+  </div>
+</div>
+
+<div class="modal" id="productModal">
+  <div class="modal-content" style="text-align:left">
+    <h2>Urus Produk</h2>
+    <div class="form-group"><label>Nama Produk</label><input type="text" id="prodName" placeholder="Contoh: Nasi Lemak"></div>
+    <div class="form-group"><label>Harga (RM)</label><input type="number" id="prodPrice" placeholder="5.00" step="0.50"></div>
+    <div class="form-actions">
+      <button class="save-btn" onclick="saveProduct()">Simpan Produk</button>
+      <button class="close-btn" style="margin-top:0" onclick="closeModal('productModal')">Tutup</button>
     </div>
+    <hr style="border-color:#eee;margin:18px 0">
+    <div id="productList"></div>
   </div>
+</div>
 
-  <!-- Modal Urus Produk -->
-  <div class="modal" id="productModal">
-    <div class="modal-content" style="text-align:left;">
-      <h2>Urus Produk</h2>
-      
-      <div class="form-group">
-        <label>Nama Produk</label>
-        <input type="text" id="prodName" placeholder="Contoh: Nasi Lemak">
-      </div>
-      <div class="form-group">
-        <label>Harga (RM)</label>
-        <input type="number" id="prodPrice" placeholder="5.00" step="0.50">
-      </div>
-      <div class="form-actions">
-        <button class="save-btn" onclick="saveProduct()">Simpan Produk</button>
-        <button class="close-btn" style="margin-top:0;" onclick="closeModal('productModal')">Tutup</button>
-      </div>
+<script>
+const defaultProducts=[{id:1,name:"Nasi Lemak",price:5},{id:2,name:"Mee Goreng",price:6},{id:3,name:"Roti Canai",price:2.5},{id:4,name:"Nasi Ayam",price:7},{id:5,name:"Teh Tarik",price:2.5},{id:6,name:"Kopi O",price:2},{id:7,name:"Nescafe",price:3},{id:8,name:"Air Mineral",price:1.5},{id:9,name:"Milo",price:3},{id:10,name:"Kuih",price:1.5}];
+let products=JSON.parse(localStorage.getItem('denyanya_products'))||defaultProducts;
+let cart=[],editingId=null,currentTotal=0;
 
-      <hr style="border-color:#eee;margin:18px 0;">
-      <div id="productList"></div>
-    </div>
-  </div>
+function saveProducts(){localStorage.setItem('denyanya_products',JSON.stringify(products))}
+function renderProducts(){document.getElementById('products').innerHTML=products.map(p=>`<div class="product"><h3>${p.name}</h3><div class="price">RM \( {p.price.toFixed(2)}</div><button onclick="addToCart( \){p.id})">+ Tambah</button></div>`).join('')}
+function addToCart(id){const p=products.find(x=>x.id===id);if(!p)return;const e=cart.find(i=>i.id===id);if(e)e.qty++;else cart.push({...p,qty:1});updateCart()}
+function changeQty(id,d){const i=cart.find(x=>x.id===id);if(!i)return;i.qty+=d;if(i.qty<=0)cart=cart.filter(x=>x.id!==id);updateCart()}
+function updateCart(){const c=document.getElementById('cart-items'),t=document.getElementById('total');if(!cart.length){c.innerHTML='<div class="empty">Cart kosong</div>';t.textContent='0.00';return}let total=0;c.innerHTML=cart.map(i=>{total+=i.price*i.qty;return`<div class="cart-item"><div><strong>${i.name}</strong><br><small>RM ${i.price.toFixed(2)} × \( {i.qty}</small></div><div class="qty-controls"><button onclick="changeQty( \){i.id},-1)">−</button><span>\( {i.qty}</span><button onclick="changeQty( \){i.id},1)">+</button></div></div>`}).join('');t.textContent=total.toFixed(2);currentTotal=total}
+function clearCart(){if(cart.length&&confirm('Kosongkan cart?')){cart=[];updateCart()}}
 
-  <script>
-    const defaultProducts = [
-      { id: 1, name: "Nasi Lemak", price: 5.00 },
-      { id: 2, name: "Mee Goreng", price: 6.00 },
-      { id: 3, name: "Roti Canai", price: 2.50 },
-      { id: 4, name: "Nasi Ayam", price: 7.00 },
-      { id: 5, name: "Teh Tarik", price: 2.50 },
-      { id: 6, name: "Kopi O", price: 2.00 },
-      { id: 7, name: "Nescafe", price: 3.00 },
-      { id: 8, name: "Air Mineral", price: 1.50 },
-      { id: 9, name: "Milo", price: 3.00 },
-      { id: 10, name: "Kuih", price: 1.50 }
-    ];
+function startCashPayment(){if(!cart.length)return alert('Cart masih kosong!');currentTotal=cart.reduce((s,i)=>s+i.price*i.qty,0);document.getElementById('cashTotal').textContent=currentTotal.toFixed(2);document.getElementById('amountReceived').value='';document.getElementById('changeBox').style.display='none';document.getElementById('cashModal').style.display='block';document.getElementById('amountReceived').oninput=function(){const r=parseFloat(this.value)||0,ch=r-currentTotal;const box=document.getElementById('changeBox'),amt=document.getElementById('changeAmount');if(r>0){box.style.display='block';if(ch>=0){amt.textContent='RM '+ch.toFixed(2);amt.style.color='#27ae60'}else{amt.textContent='Kurang RM '+Math.abs(ch).toFixed(2);amt.style.color='#e74c3c'}}else box.style.display='none'}}
+function confirmCashPayment(){const r=parseFloat(document.getElementById('amountReceived').value)||0;if(r<currentTotal)return alert('Wang tidak mencukupi!');saveSale('Cash',r);closeModal('cashModal')}
+function startQRPayment(){if(!cart.length)return alert('Cart masih kosong!');currentTotal=cart.reduce((s,i)=>s+i.price*i.qty,0);document.getElementById('qrTotal').textContent=currentTotal.toFixed(2);document.getElementById('qrModal').style.display='block'}
+function confirmQRPayment(){saveSale('QR');closeModal('qrModal')}
+function saveSale(method,received=null){const sale={id:Date.now(),date:new Date().toLocaleString('ms-MY'),timestamp:Date.now(),method,items:[...cart],total:currentTotal,received};let sales=JSON.parse(localStorage.getItem('denyanya_sales')||'[]');sales.unshift(sale);localStorage.setItem('denyanya_sales',JSON.stringify(sales));let msg=`Jualan berjaya!\n\nKaedah: ${method}\nJumlah: RM ${currentTotal.toFixed(2)}`;if(received)msg+=`\nDiterima: RM ${received.toFixed(2)}\nBaki: RM ${(received-currentTotal).toFixed(2)}`;alert(msg);cart=[];updateCart();updateStats()}
+function updateStats(){const sales=JSON.parse(localStorage.getItem('denyanya_sales')||'[]');const now=new Date(),todayStart=new Date(now.getFullYear(),now.getMonth(),now.getDate()).getTime(),monthStart=new Date(now.getFullYear(),now.getMonth(),1).getTime();let today=0,month=0,all=0;sales.forEach(s=>{all+=s.total;if(s.timestamp>=todayStart)today+=s.total;if(s.timestamp>=monthStart)month+=s.total});document.getElementById('todayTotal').textContent='RM '+today.toFixed(2);document.getElementById('monthTotal').textContent='RM '+month.toFixed(2);document.getElementById('allTotal').textContent='RM '+all.toFixed(2)}
+function showHistory(){const sales=JSON.parse(localStorage.getItem('denyanya_sales')||'[]');const list=document.getElementById('historyList');if(!sales.length)list.innerHTML='<div class="empty">Belum ada jualan</div>';else list.innerHTML=sales.map(s=>`<div class="sale-item"><div class="top"><div><strong>\( {s.date}</strong><br> \){s.method} • RM \( {s.total.toFixed(2)} \){s.received?`<br><small>Diterima: RM \( {s.received.toFixed(2)}</small>`:''}<br><small> \){s.items.map(i=>i.name+' x'+i.qty).join(', ')}</small></div><button class="btn-del" onclick="deleteSale(${s.id})">Padam</button></div></div>`).join('');document.getElementById('historyModal').style.display='block'}
+function deleteSale(id){if(!confirm('Padam jualan ini?'))return;let sales=JSON.parse(localStorage.getItem('denyanya_sales')||'[]').filter(s=>s.id!==id);localStorage.setItem('denyanya_sales',JSON.stringify(sales));showHistory();updateStats()}
+function clearAllSales(){if(!confirm('Padam SEMUA sejarah jualan?'))return;localStorage.setItem('denyanya_sales','[]');showHistory();updateStats()}
+function showProductManager(){editingId=null;document.getElementById('prodName').value='';document.getElementById('prodPrice').value='';renderProductList();document.getElementById('productModal').style.display='block'}
+function renderProductList(){document.getElementById('productList').innerHTML=products.map(p=>`<div class="product-edit-item"><div class="top"><div><strong>${p.name}</strong><br>RM \( {p.price.toFixed(2)}</div><div><button class="btn-del" style="background:#2980b9;margin-right:6px" onclick="editProduct( \){p.id})">Edit</button><button class="btn-del" onclick="deleteProduct(${p.id})">Padam</button></div></div></div>`).join('')}
+function saveProduct(){const name=document.getElementById('prodName').value.trim(),price=parseFloat(document.getElementById('prodPrice').value);if(!name||isNaN(price)||price<0)return alert('Sila masukkan nama dan harga yang betul');if(editingId){const p=products.find(x=>x.id===editingId);if(p){p.name=name;p.price=price}}else{const newId=products.length?Math.max(...products.map(p=>p.id))+1:1;products.push({id:newId,name,price})}saveProducts();renderProducts();renderProductList();editingId=null;document.getElementById('prodName').value='';document.getElementById('prodPrice').value='';alert('Produk berjaya disimpan!')}
+function editProduct(id){const p=products.find(x=>x.id===id);if(!p)return;editingId=id;document.getElementById('prodName').value=p.name;document.getElementById('prodPrice').value=p.price}
+function deleteProduct(id){if(!confirm('Padam produk ini?'))return;products=products.filter(p=>p.id!==id);saveProducts();renderProducts();renderProductList()}
+function closeModal(id){document.getElementById(id).style.display='none'}
 
-    let products = JSON.parse(localStorage.getItem('denyanya_products')) || defaultProducts;
-    let cart = [];
-    let editingId = null;
-    let currentTotal = 0;
-
-    function saveProducts() {
-      localStorage.setItem('denyanya_products', JSON.stringify(products));
-    }
-
-    function renderProducts() {
-      const container = document.getElementById('products');
-      container.innerHTML = products.map(p => `
-        <div class="product">
-          <h3>${p.name}</h3>
-          <div class="price">RM ${p.price.toFixed(2)}</div>
-          <button onclick="addToCart(${p.id})">+ Tambah</button>
-        </div>
-      `).join('');
-    }
-
-    function addToCart(id) {
-      const product = products.find(p => p.id === id);
-      if (!product) return;
-      const existing = cart.find(item => item.id === id);
-      if (existing) existing.qty += 1;
-      else cart.push({ ...product, qty: 1 });
-      updateCart();
-    }
-
-    function changeQty(id, delta) {
-      const item = cart.find(i => i.id === id);
-      if (!item) return;
-      item.qty += delta;
-      if (item.qty <= 0) cart = cart.filter(i => i.id !== id);
-      updateCart();
-    }
-
-    function updateCart() {
-      const container = document.getElementById('cart-items');
-      const totalEl = document.getElementById('total');
-      if (cart.length === 0) {
-        container.innerHTML = '<div class="empty">Cart kosong</div>';
-        totalEl.textContent = '0.00';
-        return;
-      }
-      let total = 0;
-      container.innerHTML = cart.map(item => {
-        total += item.price * item.qty;
-        return `
-          <div class="cart-item">
-            <div>
-              <strong>${item.name}</strong><br>
-              <small>RM ${item.price.toFixed(2)} × ${item.qty}</small>
-            </div>
-            <div class="qty-controls">
-              <button onclick="changeQty(${item.id}, -1)">−</button>
-              <span>${item.qty}</span>
-              <button onclick="changeQty(${item.id}, 1)">+</button>
-            </div>
-          </div>
-        `;
-      }).join('');
-      totalEl.textContent = total.toFixed(2);
-      currentTotal = total;
-    }
-
-    function clearCart() {
-      if (cart.length === 0) return;
-      if (confirm('Kosongkan cart?')) {
-        cart = [];
-        updateCart();
-      }
-    }
-
-    // ===== CASH PAYMENT =====
-    function startCashPayment() {
-      if (cart.length === 0) {
-        alert('Cart masih kosong!');
-        return;
-      }
-      currentTotal = cart.reduce((sum, item) => sum + (item.price * item.qty), 0);
-      document.getElementById('cashTotal').textContent = currentTotal.toFixed(2);
-      document.getElementById('amountReceived').value = '';
-      document.getElementById('changeBox').style.display = 'none';
-      document.getElementById('cashModal').style.display = 'block';
-      
-      // Auto kira baki bila taip
-      document.getElementById('amountReceived').oninput = function() {
-        const received = parseFloat(this.value) || 0;
-        const change = received - currentTotal;
-        const changeBox = document.getElementById('changeBox');
-        const changeAmount = document.getElementById('changeAmount');
-        
-        if (received > 0) {
-          changeBox.style.display = 'block';
-          if (change >= 0) {
-            changeAmount.textContent = 'RM ' + change.toFixed(2);
-            changeAmount.style.color = '#27ae60';
-          } else {
-            changeAmount.textContent = 'Kurang RM ' + Math.abs(change).toFixed(2);
-            changeAmount.style.color = '#e74c3c';
-          }
-        } else {
-          changeBox.style.display = 'none';
-        }
-      };
-    }
-
-    function confirmCashPayment() {
-      const received = parseFloat(document.getElementById('amountReceived').value) || 0;
-      if (received < currentTotal) {
-        alert('Wang tidak mencukupi!');
-        return;
-      }
-      saveSale('Cash', received);
-      closeModal('cashModal');
-    }
-
-    // ===== QR PAYMENT =====
-    function startQRPayment() {
-      if (cart.length === 0) {
-        alert('Cart masih kosong!');
-        return;
-      }
-      currentTotal = cart.reduce((sum, item) => sum + (item.price * item.qty), 0);
-      document.getElementById('qrTotal').textContent = currentTotal.toFixed(2);
-      document.getElementById('qrModal').style.display = 'block';
-    }
-
-    function confirmQRPayment() {
-      saveSale('QR');
-      closeModal('qrModal');
-    }
-
-    function saveSale(method, received = null) {
-      const sale = {
-        id: Date.now(),
-        date: new Date().toLocaleString('ms-MY'),
-        timestamp: Date.now(),
-        method: method,
-        items: [...cart],
-        total: currentTotal,
-        received: received
-      };
-      let sales = JSON.parse(localStorage.getItem('denyanya_sales') || '[]');
-      sales.unshift(sale);
-      localStorage.setItem('denyanya_sales', JSON.stringify(sales));
-      
-      let msg = `Jualan berjaya!\n\nKaedah: ${method}\nJumlah: RM ${currentTotal.toFixed(2)}`;
-      if (received) {
-        msg += `\nDiterima: RM ${received.toFixed(2)}\nBaki: RM ${(received - currentTotal).toFixed(2)}`;
-      }
-      alert(msg);
-      
-      cart = [];
-      updateCart();
-      updateStats();
-    }
-
-    function updateStats() {
-      const sales = JSON.parse(localStorage.getItem('denyanya_sales') || '[]');
-      const now = new Date();
-      const todayStart = new Date(now.getFullYear(), now.getMonth(), now.getDate()).getTime();
-      const monthStart = new Date(now.getFullYear(), now.getMonth(), 1).getTime();
-
-      let today = 0, month = 0, all = 0;
-      sales.forEach(s => {
-        all += s.total;
-        if (s.timestamp >= todayStart) today += s.total;
-        if (s.timestamp >= monthStart) month += s.total;
-      });
-
-      document.getElementById('todayTotal').textContent = 'RM ' + today.toFixed(2);
-      document.getElementById('monthTotal').textContent = 'RM ' + month.toFixed(2);
-      document.getElementById('allTotal').textContent = 'RM ' + all.toFixed(2);
-    }
-
-    function showHistory() {
-      const sales = JSON.parse(localStorage.getItem('denyanya_sales') || '[]');
-      const list = document.getElementById('historyList');
-      if (sales.length === 0) {
-        list.innerHTML = '<div class="empty">Belum ada jualan</div>';
-      } else {
-        list.innerHTML = sales.map(sale => `
-          <div class="sale-item">
-            <div class="top">
-              <div>
-                <strong>${sale.date}</strong><br>
-                ${sale.method} • RM ${sale.total.toFixed(2)}
-                ${sale.received ? `<br><small>Diterima: RM ${sale.received.toFixed(2)}</small>` : ''}
-                <br><small>${sale.items.map(i => i.name + ' x' + i.qty).join(', ')}</small>
-              </div>
-              <button class="btn-del" onclick="deleteSale(${sale.id})">Padam</button>
-            </div>
-          </div>
-        `).join('');
-      }
-      document.getElementById('historyModal').style.display = 'block';
-    }
-
-    function deleteSale(id) {
-      if (!confirm('Padam jualan ini?')) return;
-      let sales = JSON.parse(localStorage.getItem('denyanya_sales') || '[]');
-      sales = sales.filter(s => s.id !== id);
-      localStorage.setItem('denyanya_sales', JSON.stringify(sales));
-      showHistory();
-      updateStats();
-    }
-
-    function clearAllSales() {
-      if (!confirm('Padam SEMUA sejarah jualan?')) return;
-      localStorage.setItem('denyanya_sales', '[]');
-      showHistory();
-      updateStats();
-    }
-
-    function showProductManager() {
-      editingId = null;
-      document.getElementById('prodName').value = '';
-      document.getElementById('prodPrice').value = '';
-      renderProductList();
-      document.getElementById('productModal').style.display = 'block';
-    }
-
-    function renderProductList() {
-      const list = document.getElementById('productList');
-      list.innerHTML = products.map(p => `
-        <div class="product-edit-item">
-          <div class="top">
-            <div>
-              <strong>${p.name}</str
+renderProducts();updateCart();updateStats();
+</script>
+</body>
+</html>
