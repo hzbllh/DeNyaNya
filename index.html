@@ -12,10 +12,6 @@ body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,sans-serif;b
 header{background:#fff;padding:18px 16px;text-align:center;border-bottom:3px solid #E67E22;position:sticky;top:0;z-index:100;box-shadow:0 2px 8px rgba(0,0,0,.06)}
 header h1{font-size:1.7rem;color:#1a1a1a;font-weight:800}
 header h1 span{color:#E67E22}
-.stats{display:grid;grid-template-columns:1fr 1fr 1fr;gap:10px;padding:12px;background:#fff}
-.stat-box{background:#FFF8F0;border-radius:12px;padding:10px 6px;text-align:center;border:1px solid #f0e6d8}
-.stat-box .label{font-size:.72rem;color:#888}
-.stat-box .value{font-size:.95rem;font-weight:700;color:#E67E22;margin-top:3px}
 .products{display:grid;grid-template-columns:repeat(auto-fill,minmax(145px,1fr));gap:12px;padding:14px}
 .product{background:#fff;border-radius:14px;padding:14px 10px;text-align:center;box-shadow:0 2px 8px rgba(0,0,0,.05);border:1px solid #f0e6d8}
 .product:active{transform:scale(.97)}
@@ -38,7 +34,7 @@ header h1 span{color:#E67E22}
 .bottom-btns{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-top:8px}
 .bottom-btns button{padding:11px;border:none;border-radius:10px;font-size:.85rem;color:#555;background:#f5f0e8;font-weight:500}
 .modal{display:none;position:fixed;inset:0;background:rgba(0,0,0,.5);z-index:300;padding:16px;overflow-y:auto}
-.modal-content{background:#fff;border-radius:18px;padding:22px;max-width:420px;margin:40px auto;box-shadow:0 10px 40px rgba(0,0,0,.15);text-align:center}
+.modal-content{background:#fff;border-radius:18px;padding:22px;max-width:420px;margin:30px auto;box-shadow:0 10px 40px rgba(0,0,0,.15);text-align:center}
 .modal h2{margin-bottom:16px;color:#E67E22;font-size:1.25rem}
 .modal .amount{font-size:1.8rem;font-weight:800;margin:10px 0 20px}
 .modal input{width:100%;padding:14px;font-size:1.3rem;text-align:center;border:2px solid #E67E22;border-radius:12px;margin-bottom:16px}
@@ -59,16 +55,19 @@ header h1 span{color:#E67E22}
 .form-group label{display:block;font-size:.85rem;color:#666;margin-bottom:5px}
 .form-group input{width:100%;padding:11px;border-radius:10px;border:1px solid #ddd;background:#fff;color:#1a1a1a;font-size:1rem;text-align:left}
 .form-actions{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-top:8px}
+.summary-box{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:18px}
+.summary-item{background:#FFF8F0;border-radius:12px;padding:12px 8px;text-align:center;border:1px solid #f0e6d8}
+.summary-item .label{font-size:.75rem;color:#888}
+.summary-item .value{font-size:1rem;font-weight:700;color:#E67E22;margin-top:3px}
+.summary-item.cash .value{color:#27ae60}
+.summary-item.qr .value{color:#2980b9}
 </style>
 </head>
 <body>
 <header><h1>DE <span>NYA</span> NYA.</h1></header>
-<div class="stats">
-  <div class="stat-box"><div class="label">Hari Ini</div><div class="value" id="todayTotal">RM 0.00</div></div>
-  <div class="stat-box"><div class="label">Bulan Ini</div><div class="value" id="monthTotal">RM 0.00</div></div>
-  <div class="stat-box"><div class="label">Keseluruhan</div><div class="value" id="allTotal">RM 0.00</div></div>
-</div>
+
 <div class="products" id="products"></div>
+
 <div class="cart-panel">
   <div class="cart-header"><h2>Cart</h2><div class="total">RM <span id="total">0.00</span></div></div>
   <div class="cart-items" id="cart-items"><div class="empty">Cart kosong</div></div>
@@ -83,6 +82,7 @@ header h1 span{color:#E67E22}
   </div>
 </div>
 
+<!-- Modal Cash -->
 <div class="modal" id="cashModal">
   <div class="modal-content">
     <h2>Bayar Cash</h2>
@@ -98,6 +98,7 @@ header h1 span{color:#E67E22}
   </div>
 </div>
 
+<!-- Modal QR -->
 <div class="modal" id="qrModal">
   <div class="modal-content">
     <h2>Bayar QR</h2>
@@ -111,15 +112,42 @@ header h1 span{color:#E67E22}
   </div>
 </div>
 
+<!-- Modal Sejarah -->
 <div class="modal" id="historyModal">
   <div class="modal-content" style="text-align:left">
     <h2>Sejarah Jualan</h2>
+    
+    <!-- Ringkasan Total -->
+    <div class="summary-box">
+      <div class="summary-item">
+        <div class="label">Hari Ini</div>
+        <div class="value" id="sumToday">RM 0.00</div>
+      </div>
+      <div class="summary-item">
+        <div class="label">Bulan Ini</div>
+        <div class="value" id="sumMonth">RM 0.00</div>
+      </div>
+      <div class="summary-item">
+        <div class="label">Keseluruhan</div>
+        <div class="value" id="sumAll">RM 0.00</div>
+      </div>
+      <div class="summary-item cash">
+        <div class="label">Total Cash</div>
+        <div class="value" id="sumCash">RM 0.00</div>
+      </div>
+      <div class="summary-item qr">
+        <div class="label">Total QR</div>
+        <div class="value" id="sumQR">RM 0.00</div>
+      </div>
+    </div>
+
     <div id="historyList"></div>
     <button class="btn-del" style="width:100%;margin-top:12px;padding:11px" onclick="clearAllSales()">Padam Semua Jualan</button>
     <button class="close-btn" onclick="closeModal('historyModal')">Tutup</button>
   </div>
 </div>
 
+<!-- Modal Produk -->
 <div class="modal" id="productModal">
   <div class="modal-content" style="text-align:left">
     <h2>Urus Produk</h2>
@@ -148,13 +176,9 @@ const defaultProducts = [
   {id:10, name:"Kuih", price:1.5}
 ];
 
-// ========== PERBAIKAN DI SINI ==========
 let saved = null;
-try {
-  saved = JSON.parse(localStorage.getItem('denyanya_products'));
-} catch(e) {}
+try { saved = JSON.parse(localStorage.getItem('denyanya_products')); } catch(e) {}
 let products = (saved && saved.length > 0) ? saved : defaultProducts;
-// ======================================
 
 let cart = [];
 let editingId = null;
@@ -289,28 +313,32 @@ function saveSale(method, received = null) {
 
   cart = [];
   updateCart();
-  updateStats();
-}
-
-function updateStats() {
-  const sales = JSON.parse(localStorage.getItem('denyanya_sales') || '[]');
-  const now = new Date();
-  const todayStart = new Date(now.getFullYear(), now.getMonth(), now.getDate()).getTime();
-  const monthStart = new Date(now.getFullYear(), now.getMonth(), 1).getTime();
-  let today = 0, month = 0, all = 0;
-  sales.forEach(s => {
-    all += s.total;
-    if (s.timestamp >= todayStart) today += s.total;
-    if (s.timestamp >= monthStart) month += s.total;
-  });
-  document.getElementById('todayTotal').textContent = 'RM ' + today.toFixed(2);
-  document.getElementById('monthTotal').textContent = 'RM ' + month.toFixed(2);
-  document.getElementById('allTotal').textContent = 'RM ' + all.toFixed(2);
 }
 
 function showHistory() {
   const sales = JSON.parse(localStorage.getItem('denyanya_sales') || '[]');
   const list = document.getElementById('historyList');
+  
+  // Kira ringkasan
+  const now = new Date();
+  const todayStart = new Date(now.getFullYear(), now.getMonth(), now.getDate()).getTime();
+  const monthStart = new Date(now.getFullYear(), now.getMonth(), 1).getTime();
+  
+  let today = 0, month = 0, all = 0, cash = 0, qr = 0;
+  sales.forEach(s => {
+    all += s.total;
+    if (s.timestamp >= todayStart) today += s.total;
+    if (s.timestamp >= monthStart) month += s.total;
+    if (s.method === 'Cash') cash += s.total;
+    if (s.method === 'QR') qr += s.total;
+  });
+  
+  document.getElementById('sumToday').textContent = 'RM ' + today.toFixed(2);
+  document.getElementById('sumMonth').textContent = 'RM ' + month.toFixed(2);
+  document.getElementById('sumAll').textContent = 'RM ' + all.toFixed(2);
+  document.getElementById('sumCash').textContent = 'RM ' + cash.toFixed(2);
+  document.getElementById('sumQR').textContent = 'RM ' + qr.toFixed(2);
+
   if (!sales.length) {
     list.innerHTML = '<div class="empty">Belum ada jualan</div>';
   } else {
@@ -336,14 +364,12 @@ function deleteSale(id) {
   let sales = JSON.parse(localStorage.getItem('denyanya_sales') || '[]').filter(s => s.id !== id);
   localStorage.setItem('denyanya_sales', JSON.stringify(sales));
   showHistory();
-  updateStats();
 }
 
 function clearAllSales() {
   if (!confirm('Padam SEMUA sejarah jualan?')) return;
   localStorage.setItem('denyanya_sales', '[]');
   showHistory();
-  updateStats();
 }
 
 function showProductManager() {
@@ -418,7 +444,6 @@ function closeModal(id) {
 // Mula
 renderProducts();
 updateCart();
-updateStats();
 </script>
 </body>
 </html>
