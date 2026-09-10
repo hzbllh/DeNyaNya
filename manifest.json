@@ -1,0 +1,21 @@
+{
+  "name": "De Nya Nya",
+  "short_name": "DeNyaNya",
+  "start_url": "./",
+  "display": "standalone",
+  "background_color": "#FFF8F0",
+  "theme_color": "#E67E22",
+  "orientation": "portrait",
+  "icons": [
+    {
+      "src": "https://hzbllh.github.io/DeNyaNya/icon-192.png",
+      "sizes": "192x192",
+      "type": "image/png"
+    },
+    {
+      "src": "https://hzbllh.github.io/DeNyaNya/icon-512.png",
+      "sizes": "512x512",
+      "type": "image/png"
+    }
+  ]
+}
