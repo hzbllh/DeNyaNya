@@ -135,34 +135,290 @@ header h1 span{color:#E67E22}
 </div>
 
 <script>
-const defaultProducts=[{id:1,name:"Nasi Lemak",price:5},{id:2,name:"Mee Goreng",price:6},{id:3,name:"Roti Canai",price:2.5},{id:4,name:"Nasi Ayam",price:7},{id:5,name:"Teh Tarik",price:2.5},{id:6,name:"Kopi O",price:2},{id:7,name:"Nescafe",price:3},{id:8,name:"Air Mineral",price:1.5},{id:9,name:"Milo",price:3},{id:10,name:"Kuih",price:1.5}];
-let products=JSON.parse(localStorage.getItem('denyanya_products'))||defaultProducts;
-let cart=[],editingId=null,currentTotal=0;
+const defaultProducts = [
+  {id:1, name:"Nasi Lemak", price:5},
+  {id:2, name:"Mee Goreng", price:6},
+  {id:3, name:"Roti Canai", price:2.5},
+  {id:4, name:"Nasi Ayam", price:7},
+  {id:5, name:"Teh Tarik", price:2.5},
+  {id:6, name:"Kopi O", price:2},
+  {id:7, name:"Nescafe", price:3},
+  {id:8, name:"Air Mineral", price:1.5},
+  {id:9, name:"Milo", price:3},
+  {id:10, name:"Kuih", price:1.5}
+];
 
-function saveProducts(){localStorage.setItem('denyanya_products',JSON.stringify(products))}
-function renderProducts(){document.getElementById('products').innerHTML=products.map(p=>`<div class="product"><h3>${p.name}</h3><div class="price">RM \( {p.price.toFixed(2)}</div><button onclick="addToCart( \){p.id})">+ Tambah</button></div>`).join('')}
-function addToCart(id){const p=products.find(x=>x.id===id);if(!p)return;const e=cart.find(i=>i.id===id);if(e)e.qty++;else cart.push({...p,qty:1});updateCart()}
-function changeQty(id,d){const i=cart.find(x=>x.id===id);if(!i)return;i.qty+=d;if(i.qty<=0)cart=cart.filter(x=>x.id!==id);updateCart()}
-function updateCart(){const c=document.getElementById('cart-items'),t=document.getElementById('total');if(!cart.length){c.innerHTML='<div class="empty">Cart kosong</div>';t.textContent='0.00';return}let total=0;c.innerHTML=cart.map(i=>{total+=i.price*i.qty;return`<div class="cart-item"><div><strong>${i.name}</strong><br><small>RM ${i.price.toFixed(2)} × \( {i.qty}</small></div><div class="qty-controls"><button onclick="changeQty( \){i.id},-1)">−</button><span>\( {i.qty}</span><button onclick="changeQty( \){i.id},1)">+</button></div></div>`}).join('');t.textContent=total.toFixed(2);currentTotal=total}
-function clearCart(){if(cart.length&&confirm('Kosongkan cart?')){cart=[];updateCart()}}
+// ========== PERBAIKAN DI SINI ==========
+let saved = null;
+try {
+  saved = JSON.parse(localStorage.getItem('denyanya_products'));
+} catch(e) {}
+let products = (saved && saved.length > 0) ? saved : defaultProducts;
+// ======================================
 
-function startCashPayment(){if(!cart.length)return alert('Cart masih kosong!');currentTotal=cart.reduce((s,i)=>s+i.price*i.qty,0);document.getElementById('cashTotal').textContent=currentTotal.toFixed(2);document.getElementById('amountReceived').value='';document.getElementById('changeBox').style.display='none';document.getElementById('cashModal').style.display='block';document.getElementById('amountReceived').oninput=function(){const r=parseFloat(this.value)||0,ch=r-currentTotal;const box=document.getElementById('changeBox'),amt=document.getElementById('changeAmount');if(r>0){box.style.display='block';if(ch>=0){amt.textContent='RM '+ch.toFixed(2);amt.style.color='#27ae60'}else{amt.textContent='Kurang RM '+Math.abs(ch).toFixed(2);amt.style.color='#e74c3c'}}else box.style.display='none'}}
-function confirmCashPayment(){const r=parseFloat(document.getElementById('amountReceived').value)||0;if(r<currentTotal)return alert('Wang tidak mencukupi!');saveSale('Cash',r);closeModal('cashModal')}
-function startQRPayment(){if(!cart.length)return alert('Cart masih kosong!');currentTotal=cart.reduce((s,i)=>s+i.price*i.qty,0);document.getElementById('qrTotal').textContent=currentTotal.toFixed(2);document.getElementById('qrModal').style.display='block'}
-function confirmQRPayment(){saveSale('QR');closeModal('qrModal')}
-function saveSale(method,received=null){const sale={id:Date.now(),date:new Date().toLocaleString('ms-MY'),timestamp:Date.now(),method,items:[...cart],total:currentTotal,received};let sales=JSON.parse(localStorage.getItem('denyanya_sales')||'[]');sales.unshift(sale);localStorage.setItem('denyanya_sales',JSON.stringify(sales));let msg=`Jualan berjaya!\n\nKaedah: ${method}\nJumlah: RM ${currentTotal.toFixed(2)}`;if(received)msg+=`\nDiterima: RM ${received.toFixed(2)}\nBaki: RM ${(received-currentTotal).toFixed(2)}`;alert(msg);cart=[];updateCart();updateStats()}
-function updateStats(){const sales=JSON.parse(localStorage.getItem('denyanya_sales')||'[]');const now=new Date(),todayStart=new Date(now.getFullYear(),now.getMonth(),now.getDate()).getTime(),monthStart=new Date(now.getFullYear(),now.getMonth(),1).getTime();let today=0,month=0,all=0;sales.forEach(s=>{all+=s.total;if(s.timestamp>=todayStart)today+=s.total;if(s.timestamp>=monthStart)month+=s.total});document.getElementById('todayTotal').textContent='RM '+today.toFixed(2);document.getElementById('monthTotal').textContent='RM '+month.toFixed(2);document.getElementById('allTotal').textContent='RM '+all.toFixed(2)}
-function showHistory(){const sales=JSON.parse(localStorage.getItem('denyanya_sales')||'[]');const list=document.getElementById('historyList');if(!sales.length)list.innerHTML='<div class="empty">Belum ada jualan</div>';else list.innerHTML=sales.map(s=>`<div class="sale-item"><div class="top"><div><strong>\( {s.date}</strong><br> \){s.method} • RM \( {s.total.toFixed(2)} \){s.received?`<br><small>Diterima: RM \( {s.received.toFixed(2)}</small>`:''}<br><small> \){s.items.map(i=>i.name+' x'+i.qty).join(', ')}</small></div><button class="btn-del" onclick="deleteSale(${s.id})">Padam</button></div></div>`).join('');document.getElementById('historyModal').style.display='block'}
-function deleteSale(id){if(!confirm('Padam jualan ini?'))return;let sales=JSON.parse(localStorage.getItem('denyanya_sales')||'[]').filter(s=>s.id!==id);localStorage.setItem('denyanya_sales',JSON.stringify(sales));showHistory();updateStats()}
-function clearAllSales(){if(!confirm('Padam SEMUA sejarah jualan?'))return;localStorage.setItem('denyanya_sales','[]');showHistory();updateStats()}
-function showProductManager(){editingId=null;document.getElementById('prodName').value='';document.getElementById('prodPrice').value='';renderProductList();document.getElementById('productModal').style.display='block'}
-function renderProductList(){document.getElementById('productList').innerHTML=products.map(p=>`<div class="product-edit-item"><div class="top"><div><strong>${p.name}</strong><br>RM \( {p.price.toFixed(2)}</div><div><button class="btn-del" style="background:#2980b9;margin-right:6px" onclick="editProduct( \){p.id})">Edit</button><button class="btn-del" onclick="deleteProduct(${p.id})">Padam</button></div></div></div>`).join('')}
-function saveProduct(){const name=document.getElementById('prodName').value.trim(),price=parseFloat(document.getElementById('prodPrice').value);if(!name||isNaN(price)||price<0)return alert('Sila masukkan nama dan harga yang betul');if(editingId){const p=products.find(x=>x.id===editingId);if(p){p.name=name;p.price=price}}else{const newId=products.length?Math.max(...products.map(p=>p.id))+1:1;products.push({id:newId,name,price})}saveProducts();renderProducts();renderProductList();editingId=null;document.getElementById('prodName').value='';document.getElementById('prodPrice').value='';alert('Produk berjaya disimpan!')}
-function editProduct(id){const p=products.find(x=>x.id===id);if(!p)return;editingId=id;document.getElementById('prodName').value=p.name;document.getElementById('prodPrice').value=p.price}
-function deleteProduct(id){if(!confirm('Padam produk ini?'))return;products=products.filter(p=>p.id!==id);saveProducts();renderProducts();renderProductList()}
-function closeModal(id){document.getElementById(id).style.display='none'}
+let cart = [];
+let editingId = null;
+let currentTotal = 0;
 
-renderProducts();updateCart();updateStats();
+function saveProducts() {
+  localStorage.setItem('denyanya_products', JSON.stringify(products));
+}
+
+function renderProducts() {
+  document.getElementById('products').innerHTML = products.map(p => `
+    <div class="product">
+      <h3>${p.name}</h3>
+      <div class="price">RM ${p.price.toFixed(2)}</div>
+      <button onclick="addToCart(${p.id})">+ Tambah</button>
+    </div>
+  `).join('');
+}
+
+function addToCart(id) {
+  const p = products.find(x => x.id === id);
+  if (!p) return;
+  const e = cart.find(i => i.id === id);
+  if (e) e.qty++;
+  else cart.push({...p, qty: 1});
+  updateCart();
+}
+
+function changeQty(id, d) {
+  const i = cart.find(x => x.id === id);
+  if (!i) return;
+  i.qty += d;
+  if (i.qty <= 0) cart = cart.filter(x => x.id !== id);
+  updateCart();
+}
+
+function updateCart() {
+  const c = document.getElementById('cart-items');
+  const t = document.getElementById('total');
+  if (!cart.length) {
+    c.innerHTML = '<div class="empty">Cart kosong</div>';
+    t.textContent = '0.00';
+    return;
+  }
+  let total = 0;
+  c.innerHTML = cart.map(i => {
+    total += i.price * i.qty;
+    return `<div class="cart-item">
+      <div><strong>${i.name}</strong><br><small>RM ${i.price.toFixed(2)} × ${i.qty}</small></div>
+      <div class="qty-controls">
+        <button onclick="changeQty(${i.id},-1)">−</button>
+        <span>${i.qty}</span>
+        <button onclick="changeQty(${i.id},1)">+</button>
+      </div>
+    </div>`;
+  }).join('');
+  t.textContent = total.toFixed(2);
+  currentTotal = total;
+}
+
+function clearCart() {
+  if (cart.length && confirm('Kosongkan cart?')) {
+    cart = [];
+    updateCart();
+  }
+}
+
+function startCashPayment() {
+  if (!cart.length) return alert('Cart masih kosong!');
+  currentTotal = cart.reduce((s, i) => s + i.price * i.qty, 0);
+  document.getElementById('cashTotal').textContent = currentTotal.toFixed(2);
+  document.getElementById('amountReceived').value = '';
+  document.getElementById('changeBox').style.display = 'none';
+  document.getElementById('cashModal').style.display = 'block';
+
+  document.getElementById('amountReceived').oninput = function() {
+    const r = parseFloat(this.value) || 0;
+    const ch = r - currentTotal;
+    const box = document.getElementById('changeBox');
+    const amt = document.getElementById('changeAmount');
+    if (r > 0) {
+      box.style.display = 'block';
+      if (ch >= 0) {
+        amt.textContent = 'RM ' + ch.toFixed(2);
+        amt.style.color = '#27ae60';
+      } else {
+        amt.textContent = 'Kurang RM ' + Math.abs(ch).toFixed(2);
+        amt.style.color = '#e74c3c';
+      }
+    } else {
+      box.style.display = 'none';
+    }
+  };
+}
+
+function confirmCashPayment() {
+  const r = parseFloat(document.getElementById('amountReceived').value) || 0;
+  if (r < currentTotal) return alert('Wang tidak mencukupi!');
+  saveSale('Cash', r);
+  closeModal('cashModal');
+}
+
+function startQRPayment() {
+  if (!cart.length) return alert('Cart masih kosong!');
+  currentTotal = cart.reduce((s, i) => s + i.price * i.qty, 0);
+  document.getElementById('qrTotal').textContent = currentTotal.toFixed(2);
+  document.getElementById('qrModal').style.display = 'block';
+}
+
+function confirmQRPayment() {
+  saveSale('QR');
+  closeModal('qrModal');
+}
+
+function saveSale(method, received = null) {
+  const sale = {
+    id: Date.now(),
+    date: new Date().toLocaleString('ms-MY'),
+    timestamp: Date.now(),
+    method,
+    items: [...cart],
+    total: currentTotal,
+    received
+  };
+  let sales = JSON.parse(localStorage.getItem('denyanya_sales') || '[]');
+  sales.unshift(sale);
+  localStorage.setItem('denyanya_sales', JSON.stringify(sales));
+
+  let msg = `Jualan berjaya!\n\nKaedah: ${method}\nJumlah: RM ${currentTotal.toFixed(2)}`;
+  if (received) msg += `\nDiterima: RM ${received.toFixed(2)}\nBaki: RM ${(received - currentTotal).toFixed(2)}`;
+  alert(msg);
+
+  cart = [];
+  updateCart();
+  updateStats();
+}
+
+function updateStats() {
+  const sales = JSON.parse(localStorage.getItem('denyanya_sales') || '[]');
+  const now = new Date();
+  const todayStart = new Date(now.getFullYear(), now.getMonth(), now.getDate()).getTime();
+  const monthStart = new Date(now.getFullYear(), now.getMonth(), 1).getTime();
+  let today = 0, month = 0, all = 0;
+  sales.forEach(s => {
+    all += s.total;
+    if (s.timestamp >= todayStart) today += s.total;
+    if (s.timestamp >= monthStart) month += s.total;
+  });
+  document.getElementById('todayTotal').textContent = 'RM ' + today.toFixed(2);
+  document.getElementById('monthTotal').textContent = 'RM ' + month.toFixed(2);
+  document.getElementById('allTotal').textContent = 'RM ' + all.toFixed(2);
+}
+
+function showHistory() {
+  const sales = JSON.parse(localStorage.getItem('denyanya_sales') || '[]');
+  const list = document.getElementById('historyList');
+  if (!sales.length) {
+    list.innerHTML = '<div class="empty">Belum ada jualan</div>';
+  } else {
+    list.innerHTML = sales.map(s => `
+      <div class="sale-item">
+        <div class="top">
+          <div>
+            <strong>${s.date}</strong><br>
+            ${s.method} • RM ${s.total.toFixed(2)}
+            ${s.received ? `<br><small>Diterima: RM ${s.received.toFixed(2)}</small>` : ''}
+            <br><small>${s.items.map(i => i.name + ' x' + i.qty).join(', ')}</small>
+          </div>
+          <button class="btn-del" onclick="deleteSale(${s.id})">Padam</button>
+        </div>
+      </div>
+    `).join('');
+  }
+  document.getElementById('historyModal').style.display = 'block';
+}
+
+function deleteSale(id) {
+  if (!confirm('Padam jualan ini?')) return;
+  let sales = JSON.parse(localStorage.getItem('denyanya_sales') || '[]').filter(s => s.id !== id);
+  localStorage.setItem('denyanya_sales', JSON.stringify(sales));
+  showHistory();
+  updateStats();
+}
+
+function clearAllSales() {
+  if (!confirm('Padam SEMUA sejarah jualan?')) return;
+  localStorage.setItem('denyanya_sales', '[]');
+  showHistory();
+  updateStats();
+}
+
+function showProductManager() {
+  editingId = null;
+  document.getElementById('prodName').value = '';
+  document.getElementById('prodPrice').value = '';
+  renderProductList();
+  document.getElementById('productModal').style.display = 'block';
+}
+
+function renderProductList() {
+  document.getElementById('productList').innerHTML = products.map(p => `
+    <div class="product-edit-item">
+      <div class="top">
+        <div>
+          <strong>${p.name}</strong><br>
+          RM ${p.price.toFixed(2)}
+        </div>
+        <div>
+          <button class="btn-del" style="background:#2980b9;margin-right:6px" onclick="editProduct(${p.id})">Edit</button>
+          <button class="btn-del" onclick="deleteProduct(${p.id})">Padam</button>
+        </div>
+      </div>
+    </div>
+  `).join('');
+}
+
+function saveProduct() {
+  const name = document.getElementById('prodName').value.trim();
+  const price = parseFloat(document.getElementById('prodPrice').value);
+  if (!name || isNaN(price) || price < 0) return alert('Sila masukkan nama dan harga yang betul');
+  
+  if (editingId) {
+    const p = products.find(x => x.id === editingId);
+    if (p) {
+      p.name = name;
+      p.price = price;
+    }
+  } else {
+    const newId = products.length ? Math.max(...products.map(p => p.id)) + 1 : 1;
+    products.push({id: newId, name, price});
+  }
+  saveProducts();
+  renderProducts();
+  renderProductList();
+  editingId = null;
+  document.getElementById('prodName').value = '';
+  document.getElementById('prodPrice').value = '';
+  alert('Produk berjaya disimpan!');
+}
+
+function editProduct(id) {
+  const p = products.find(x => x.id === id);
+  if (!p) return;
+  editingId = id;
+  document.getElementById('prodName').value = p.name;
+  document.getElementById('prodPrice').value = p.price;
+}
+
+function deleteProduct(id) {
+  if (!confirm('Padam produk ini?')) return;
+  products = products.filter(p => p.id !== id);
+  saveProducts();
+  renderProducts();
+  renderProductList();
+}
+
+function closeModal(id) {
+  document.getElementById(id).style.display = 'none';
+}
+
+// Mula
+renderProducts();
+updateCart();
+updateStats();
 </script>
 </body>
 </html>
