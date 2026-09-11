@@ -8,7 +8,7 @@
 <link rel="manifest" href="manifest.json">
 <title>De Nya Nya</title>
 <style>
-*{box-sizing:border-box;margin:0;padding:0}
+*{box-sizing:border-box;margin:0;padding:0;-webkit-tap-highlight-color:transparent}
 body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,sans-serif;background:#FFF8F0;color:#1a1a1a;padding-bottom:270px}
 header{background:#fff;padding:16px;text-align:center;border-bottom:3px solid #E67E22;position:sticky;top:0;z-index:100}
 header h1{font-size:1.6rem;font-weight:800}header h1 span{color:#E67E22}
@@ -29,32 +29,37 @@ header h1{font-size:1.6rem;font-weight:800}header h1 span{color:#E67E22}
 .btn-clear{background:#95a5a6;grid-column:span 2;margin-top:4px}
 .bottom-btns{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-top:10px}
 .bottom-btns button{padding:12px;border:none;border-radius:12px;font-size:.88rem;background:#f5f0e8;color:#555}
-.modal{display:none;position:fixed;inset:0;background:rgba(0,0,0,.55);z-index:300;padding:16px;overflow-y:auto}
-.modal-content{background:#fff;border-radius:20px;padding:24px 20px;max-width:420px;margin:30px auto;text-align:center}
-.modal h2{margin-bottom:18px;color:#E67E22;font-size:1.3rem}
-.modal .amount{font-size:1.9rem;font-weight:800;margin:8px 0 20px}
-.modal input{width:100%;padding:16px;font-size:1.4rem;text-align:center;border:2px solid #E67E22;border-radius:14px;margin-bottom:16px}
-.change-box{background:#FFF8F0;border-radius:14px;padding:16px;margin:12px 0 20px}
-.change-box .value{font-size:1.7rem;font-weight:800;color:#27ae60;margin-top:4px}
-.qr-image{width:220px;height:220px;margin:8px auto 18px;display:flex;align-items:center;justify-content:center;border:2px dashed #ddd;border-radius:16px}
-.qr-image img{width:200px;height:200px}
+.modal{display:none;position:fixed;inset:0;background:rgba(0,0,0,.55);z-index:300;padding:12px;overflow-y:auto}
+.modal-content{background:#fff;border-radius:20px;padding:20px 16px;max-width:400px;margin:20px auto;text-align:center}
+.modal h2{margin-bottom:12px;color:#E67E22;font-size:1.25rem}
+.modal .amount{font-size:1.7rem;font-weight:800;margin:6px 0 14px}
+.display-box{background:#f8f8f8;border:2px solid #E67E22;border-radius:14px;padding:14px;font-size:1.8rem;font-weight:700;margin-bottom:14px;min-height:60px;display:flex;align-items:center;justify-content:center}
+.change-box{background:#FFF8F0;border-radius:12px;padding:12px;margin-bottom:14px}
+.change-box .value{font-size:1.5rem;font-weight:800;color:#27ae60}
+.numpad{display:grid;grid-template-columns:1fr 1fr 1fr;gap:10px;margin-bottom:14px}
+.numpad button{padding:18px 0;font-size:1.4rem;font-weight:700;border:none;border-radius:14px;background:#f0f0f0;color:#1a1a1a}
+.numpad button:active{background:#ddd}
+.numpad .btn-zero{grid-column:span 2}
+.numpad .btn-del{background:#ffebee;color:#e74c3c}
 .btn-confirm{background:#27ae60;color:#fff;border:none;padding:15px;width:100%;border-radius:14px;font-size:1.05rem;font-weight:600}
-.btn-cancel{background:#f0f0f0;color:#555;border:none;padding:13px;width:100%;border-radius:14px;margin-top:10px}
-.summary-grid{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:20px}
-.summary-item{background:#FFF8F0;border-radius:14px;padding:14px 10px;text-align:center}
-.summary-item .label{font-size:.72rem;color:#888}
-.summary-item .value{font-size:1.05rem;font-weight:700;color:#E67E22;margin-top:3px}
+.btn-cancel{background:#f0f0f0;color:#555;border:none;padding:13px;width:100%;border-radius:14px;margin-top:8px}
+.qr-image{width:200px;height:200px;margin:8px auto 16px;display:flex;align-items:center;justify-content:center;border:2px dashed #ddd;border-radius:16px}
+.qr-image img{width:180px;height:180px}
+.summary-grid{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:18px}
+.summary-item{background:#FFF8F0;border-radius:12px;padding:12px 8px;text-align:center}
+.summary-item .label{font-size:.7rem;color:#888}
+.summary-item .value{font-size:1rem;font-weight:700;color:#E67E22;margin-top:3px}
 .summary-item.cash .value{color:#27ae60}.summary-item.qr .value{color:#2980b9}
 .summary-item.full{grid-column:span 2}
-.sale-item,.product-edit-item{background:#FFF8F0;padding:14px;border-radius:14px;margin-bottom:10px;font-size:.9rem;text-align:left}
-.sale-item .top,.product-edit-item .top{display:flex;justify-content:space-between;gap:10px}
-.btn-del{background:#e74c3c;color:#fff;border:none;padding:7px 12px;border-radius:8px;font-size:.8rem}
-.close-btn,.save-btn{background:#E67E22;color:#fff;border:none;padding:14px;width:100%;border-radius:14px;margin-top:14px;font-weight:600}
+.sale-item,.product-edit-item{background:#FFF8F0;padding:12px;border-radius:12px;margin-bottom:10px;font-size:.9rem;text-align:left}
+.sale-item .top,.product-edit-item .top{display:flex;justify-content:space-between;gap:8px}
+.btn-del{background:#e74c3c;color:#fff;border:none;padding:6px 11px;border-radius:8px;font-size:.8rem}
+.close-btn,.save-btn{background:#E67E22;color:#fff;border:none;padding:14px;width:100%;border-radius:14px;margin-top:12px;font-weight:600}
 .save-btn{background:#27ae60}
-.empty{text-align:center;color:#999;padding:28px}
-.form-group{margin-bottom:14px;text-align:left}
-.form-group label{display:block;font-size:.85rem;color:#666;margin-bottom:6px}
-.form-group input{width:100%;padding:13px;border-radius:12px;border:1px solid #ddd;font-size:1rem}
+.empty{text-align:center;color:#999;padding:24px}
+.form-group{margin-bottom:12px;text-align:left}
+.form-group label{display:block;font-size:.85rem;color:#666;margin-bottom:5px}
+.form-group input{width:100%;padding:12px;border-radius:12px;border:1px solid #ddd;font-size:1rem}
 .form-actions{display:grid;grid-template-columns:1fr 1fr;gap:10px}
 </style>
 </head>
@@ -75,20 +80,40 @@ header h1{font-size:1.6rem;font-weight:800}header h1 span{color:#E67E22}
   </div>
 </div>
 
+<!-- Cash Modal dengan Number Pad -->
 <div class="modal" id="cashModal">
   <div class="modal-content">
     <h2>Bayar Cash</h2>
     <div class="amount">Jumlah: RM <span id="cashTotal">0.00</span></div>
-    <input type="number" id="amountReceived" placeholder="Customer bayar berapa?" step="0.10" inputmode="decimal">
+    
+    <div class="display-box" id="cashDisplay">0</div>
+    
     <div class="change-box" id="changeBox" style="display:none">
-      <div class="label">Baki</div>
+      <div style="font-size:.85rem;color:#666">Baki</div>
       <div class="value" id="changeAmount">RM 0.00</div>
     </div>
-    <button class="btn-confirm" onclick="confirmCashPayment()">Sahkan</button>
+
+    <div class="numpad">
+      <button onclick="numpadPress('1')">1</button>
+      <button onclick="numpadPress('2')">2</button>
+      <button onclick="numpadPress('3')">3</button>
+      <button onclick="numpadPress('4')">4</button>
+      <button onclick="numpadPress('5')">5</button>
+      <button onclick="numpadPress('6')">6</button>
+      <button onclick="numpadPress('7')">7</button>
+      <button onclick="numpadPress('8')">8</button>
+      <button onclick="numpadPress('9')">9</button>
+      <button class="btn-del" onclick="numpadPress('C')">C</button>
+      <button class="btn-zero" onclick="numpadPress('0')">0</button>
+      <button onclick="numpadPress('.')">.</button>
+    </div>
+
+    <button class="btn-confirm" onclick="confirmCashPayment()">Sahkan Pembayaran</button>
     <button class="btn-cancel" onclick="closeModal('cashModal')">Batal</button>
   </div>
 </div>
 
+<!-- QR Modal -->
 <div class="modal" id="qrModal">
   <div class="modal-content">
     <h2>Bayar QR</h2>
@@ -99,6 +124,7 @@ header h1{font-size:1.6rem;font-weight:800}header h1 span{color:#E67E22}
   </div>
 </div>
 
+<!-- History Modal -->
 <div class="modal" id="historyModal">
   <div class="modal-content" style="text-align:left">
     <h2>Sejarah Jualan</h2>
@@ -117,6 +143,7 @@ header h1{font-size:1.6rem;font-weight:800}header h1 span{color:#E67E22}
   </div>
 </div>
 
+<!-- Product Modal -->
 <div class="modal" id="productModal">
   <div class="modal-content" style="text-align:left">
     <h2>Urus Produk</h2>
@@ -134,8 +161,7 @@ header h1{font-size:1.6rem;font-weight:800}header h1 span{color:#E67E22}
 const defaultProducts=[{id:1,name:"Nasi Lemak",price:5},{id:2,name:"Mee Goreng",price:6},{id:3,name:"Roti Canai",price:2.5},{id:4,name:"Nasi Ayam",price:7},{id:5,name:"Teh Tarik",price:2.5},{id:6,name:"Kopi O",price:2},{id:7,name:"Nescafe",price:3},{id:8,name:"Air Mineral",price:1.5},{id:9,name:"Milo",price:3},{id:10,name:"Kuih",price:1.5}];
 let products=JSON.parse(localStorage.getItem('denyanya_products')||'null');
 if(!products||!products.length)products=defaultProducts;
-
-let cart=[],editingId=null,currentTotal=0;
+let cart=[],editingId=null,currentTotal=0,cashInput='';
 
 function renderProducts(){
   let html='';
@@ -145,56 +171,65 @@ function renderProducts(){
   }
   document.getElementById('products').innerHTML=html;
 }
-
 function addToCart(id){
-  let p=products.find(x=>x.id===id);
-  if(!p)return;
+  let p=products.find(x=>x.id===id);if(!p)return;
   let e=cart.find(i=>i.id===id);
   if(e)e.qty++;else cart.push({id:p.id,name:p.name,price:p.price,qty:1});
   updateCart();
 }
-
 function changeQty(id,d){
-  let i=cart.find(x=>x.id===id);
-  if(!i)return;
-  i.qty+=d;
-  if(i.qty<=0)cart=cart.filter(x=>x.id!==id);
+  let i=cart.find(x=>x.id===id);if(!i)return;
+  i.qty+=d;if(i.qty<=0)cart=cart.filter(x=>x.id!==id);
   updateCart();
 }
-
 function updateCart(){
   let c=document.getElementById('cart-items'),t=document.getElementById('total');
   if(!cart.length){c.innerHTML='<div class="empty">Cart kosong</div>';t.textContent='0.00';return;}
   let total=0,html='';
   for(let i=0;i<cart.length;i++){
-    let item=cart[i];
-    total+=item.price*item.qty;
+    let item=cart[i];total+=item.price*item.qty;
     html+='<div class="cart-item"><div><strong>'+item.name+'</strong><br><small>RM '+item.price.toFixed(2)+' x '+item.qty+'</small></div><div class="qty-controls"><button onclick="changeQty('+item.id+',-1)">-</button><span>'+item.qty+'</span><button onclick="changeQty('+item.id+',1)">+</button></div></div>';
   }
-  c.innerHTML=html;
-  t.textContent=total.toFixed(2);
-  currentTotal=total;
+  c.innerHTML=html;t.textContent=total.toFixed(2);currentTotal=total;
 }
-
 function clearCart(){if(cart.length&&confirm('Kosongkan cart?')){cart=[];updateCart();}}
 
 function startCashPayment(){
   if(!cart.length)return alert('Cart kosong!');
   currentTotal=cart.reduce((s,i)=>s+i.price*i.qty,0);
   document.getElementById('cashTotal').textContent=currentTotal.toFixed(2);
-  document.getElementById('amountReceived').value='';
+  cashInput='';
+  document.getElementById('cashDisplay').textContent='0';
   document.getElementById('changeBox').style.display='none';
   document.getElementById('cashModal').style.display='block';
-  document.getElementById('amountReceived').oninput=function(){
-    let r=parseFloat(this.value)||0,ch=r-currentTotal;
-    let box=document.getElementById('changeBox'),amt=document.getElementById('changeAmount');
-    if(r>0){box.style.display='block';amt.textContent=ch>=0?'RM '+ch.toFixed(2):'Kurang RM '+Math.abs(ch).toFixed(2);amt.style.color=ch>=0?'#27ae60':'#e74c3c';}
-    else box.style.display='none';
-  };
 }
-
+function numpadPress(key){
+  if(key==='C'){cashInput='';}
+  else if(key==='.'){if(cashInput.indexOf('.')===-1)cashInput+=(cashInput===''?'0.':'.');}
+  else{
+    if(cashInput==='0')cashInput=key;
+    else cashInput+=key;
+  }
+  // limit 2 decimal
+  if(cashInput.indexOf('.')>-1){
+    let parts=cashInput.split('.');
+    if(parts[1].length>2)cashInput=parts[0]+'.'+parts[1].substring(0,2);
+  }
+  document.getElementById('cashDisplay').textContent=cashInput||'0';
+  updateChange();
+}
+function updateChange(){
+  let r=parseFloat(cashInput)||0;
+  let ch=r-currentTotal;
+  let box=document.getElementById('changeBox'),amt=document.getElementById('changeAmount');
+  if(r>0){
+    box.style.display='block';
+    amt.textContent=ch>=0?'RM '+ch.toFixed(2):'Kurang RM '+Math.abs(ch).toFixed(2);
+    amt.style.color=ch>=0?'#27ae60':'#e74c3c';
+  }else box.style.display='none';
+}
 function confirmCashPayment(){
-  let r=parseFloat(document.getElementById('amountReceived').value)||0;
+  let r=parseFloat(cashInput)||0;
   if(r<currentTotal)return alert('Wang tidak cukup!');
   saveSale('Cash',r);
   closeModal('cashModal');
@@ -206,7 +241,6 @@ function startQRPayment(){
   document.getElementById('qrTotal').textContent=currentTotal.toFixed(2);
   document.getElementById('qrModal').style.display='block';
 }
-
 function confirmQRPayment(){saveSale('QR');closeModal('qrModal');}
 
 function saveSale(method,received){
@@ -245,8 +279,7 @@ function showHistory(){
   else{
     let html='';
     for(let i=0;i<sales.length;i++){
-      let s=sales[i];
-      let items='';
+      let s=sales[i],items='';
       for(let j=0;j<s.items.length;j++)items+=s.items[j].name+' x'+s.items[j].qty+(j<s.items.length-1?', ':'');
       html+='<div class="sale-item"><div class="top"><div><strong>'+s.date+'</strong><br>'+s.method+' • RM '+s.total.toFixed(2)+(s.received?'<br><small>Diterima: RM '+s.received.toFixed(2)+'</small>':'')+'<br><small>'+items+'</small></div><button class="btn-del" onclick="deleteSale('+s.id+')">Padam</button></div></div>';
     }
@@ -254,7 +287,6 @@ function showHistory(){
   }
   document.getElementById('historyModal').style.display='block';
 }
-
 function deleteSale(id){if(!confirm('Padam?'))return;let sales=JSON.parse(localStorage.getItem('denyanya_sales')||'[]').filter(s=>s.id!==id);localStorage.setItem('denyanya_sales',JSON.stringify(sales));showHistory();}
 function clearAllSales(){if(!confirm('Padam semua?'))return;localStorage.setItem('denyanya_sales','[]');showHistory();}
 
@@ -273,16 +305,15 @@ function saveProduct(){
   if(editingId){let p=products.find(x=>x.id===editingId);if(p){p.name=name;p.price=price;}}
   else{let newId=products.length?Math.max(...products.map(p=>p.id))+1:1;products.push({id:newId,name:name,price:price});}
   localStorage.setItem('denyanya_products',JSON.stringify(products));
-  renderProducts();renderProductList();
-  editingId=null;document.getElementById('prodName').value='';document.getElementById('prodPrice').value='';
+  renderProducts();renderProductList();editingId=null;
+  document.getElementById('prodName').value='';document.getElementById('prodPrice').value='';
   alert('Berjaya!');
 }
 function editProduct(id){let p=products.find(x=>x.id===id);if(!p)return;editingId=id;document.getElementById('prodName').value=p.name;document.getElementById('prodPrice').value=p.price;}
 function deleteProduct(id){if(!confirm('Padam produk?'))return;products=products.filter(p=>p.id!==id);localStorage.setItem('denyanya_products',JSON.stringify(products));renderProducts();renderProductList();}
 function closeModal(id){document.getElementById(id).style.display='none';}
 
-renderProducts();
-updateCart();
+renderProducts();updateCart();
 if('serviceWorker' in navigator)navigator.serviceWorker.register('sw.js').catch(function(){});
 </script>
 </body>
