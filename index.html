@@ -14,6 +14,8 @@ header{background:#fff;padding:14px 16px 12px;text-align:center;border-bottom:3p
 header img{height:52px;margin-bottom:6px;object-fit:contain}
 header h1{font-size:1.45rem;font-weight:800}
 header h1 span{color:#E67E22}
+.install-banner{display:none;background:#E67E22;color:#fff;padding:12px 16px;text-align:center;font-size:.95rem;font-weight:600}
+.install-banner button{background:#fff;color:#E67E22;border:none;padding:8px 18px;border-radius:20px;font-weight:700;margin-left:10px;font-size:.9rem}
 .products{display:grid;grid-template-columns:1fr 1fr;gap:12px;padding:14px}
 .product{background:#fff;border-radius:16px;padding:16px 12px;text-align:center;border:1px solid #f0e6d8}
 .product h3{font-size:.95rem;margin-bottom:6px}
@@ -73,11 +75,18 @@ header h1 span{color:#E67E22}
 </style>
 </head>
 <body>
+<div class="install-banner" id="installBanner">
+  Install De Nya Nya sebagai App
+  <button onclick="installApp()">Install</button>
+</div>
+
 <header>
   <img src="https://raw.githubusercontent.com/hzbllh/DeNyaNya/refs/heads/main/IMG-20250730-WA0008.jpg" alt="Logo">
   <h1>DE <span>NYA</span> NYA.</h1>
 </header>
+
 <div class="products" id="products"></div>
+
 <div class="cart-panel">
   <div class="cart-header"><h2>Cart</h2><div class="total">RM <span id="total">0.00</span></div></div>
   <div class="cart-items" id="cart-items"><div class="empty">Cart kosong</div></div>
@@ -166,6 +175,31 @@ const defaultProducts=[{id:1,name:"Nasi Lemak",price:5},{id:2,name:"Mee Goreng",
 let products=JSON.parse(localStorage.getItem('denyanya_products')||'null');
 if(!products||!products.length)products=defaultProducts;
 let cart=[],editingId=null,currentTotal=0,cashInput='';
+let deferredPrompt=null;
+
+// ===== INSTALL APP =====
+window.addEventListener('beforeinstallprompt', (e) => {
+  e.preventDefault();
+  deferredPrompt = e;
+  document.getElementById('installBanner').style.display = 'block';
+});
+function installApp(){
+  if(!deferredPrompt){
+    alert('Sila tekan menu Chrome (tiga titik) → Add to Home screen / Install app');
+    return;
+  }
+  deferredPrompt.prompt();
+  deferredPrompt.userChoice.then((choice) => {
+    if(choice.outcome === 'accepted'){
+      document.getElementById('installBanner').style.display = 'none';
+    }
+    deferredPrompt = null;
+  });
+}
+window.addEventListener('appinstalled', () => {
+  document.getElementById('installBanner').style.display = 'none';
+  deferredPrompt = null;
+});
 
 function renderProducts(){
   let html='';
