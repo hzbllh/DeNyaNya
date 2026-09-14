@@ -1,27 +1,25 @@
-const CACHE_NAME = 'denyanya-v1';
-const urlsToCache = [
-  './',
-  './index.html',
-  './manifest.json',
-  './icon-192.jpg',
-  './icon-512.jpg'
-];
+const CACHE = 'denyanya-v2';
 
-self.addEventListener('install', (event) => {
-  event.waitUntil(
-    caches.open(CACHE_NAME)
-      .then((cache) => cache.addAll(urlsToCache))
-      .then(() => self.skipWaiting())
+self.addEventListener('install', (e) => {
+  e.waitUntil(
+    caches.open(CACHE).then((cache) => {
+      return cache.addAll([
+        './',
+        './index.html',
+        './manifest.json'
+      ]);
+    }).then(() => self.skipWaiting())
   );
 });
 
-self.addEventListener('activate', (event) => {
-  event.waitUntil(self.clients.claim());
+self.addEventListener('activate', (e) => {
+  e.waitUntil(self.clients.claim());
 });
 
-self.addEventListener('fetch', (event) => {
-  event.respondWith(
-    caches.match(event.request)
-      .then((response) => response || fetch(event.request))
+self.addEventListener('fetch', (e) => {
+  e.respondWith(
+    caches.match(e.request).then((res) => {
+      return res || fetch(e.request);
+    })
   );
 });
