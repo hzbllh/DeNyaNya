@@ -79,14 +79,11 @@ header h1 span{color:#E67E22}
   Install De Nya Nya sebagai App
   <button onclick="installApp()">Install</button>
 </div>
-
 <header>
   <img src="https://raw.githubusercontent.com/hzbllh/DeNyaNya/refs/heads/main/IMG-20250730-WA0008.jpg" alt="Logo">
   <h1>DE <span>NYA</span> NYA.</h1>
 </header>
-
 <div class="products" id="products"></div>
-
 <div class="cart-panel">
   <div class="cart-header"><h2>Cart</h2><div class="total">RM <span id="total">0.00</span></div></div>
   <div class="cart-items" id="cart-items"><div class="empty">Cart kosong</div></div>
@@ -100,7 +97,6 @@ header h1 span{color:#E67E22}
     <button onclick="showProductManager()">Urus Produk</button>
   </div>
 </div>
-
 <div class="modal" id="cashModal">
   <div class="modal-content">
     <h2>Bayar Cash</h2>
@@ -128,7 +124,6 @@ header h1 span{color:#E67E22}
     <button class="btn-cancel" onclick="closeModal('cashModal')">Batal</button>
   </div>
 </div>
-
 <div class="modal" id="qrModal">
   <div class="modal-content">
     <h2>Bayar QR</h2>
@@ -137,9 +132,7 @@ header h1 span{color:#E67E22}
     <button class="btn-confirm" onclick="confirmQRPayment()">Sahkan Pembayaran</button>
     <button class="btn-cancel" onclick="closeModal('qrModal')">Batal</button>
   </div>
-</div>
-
-<div class="modal" id="historyModal">
+</div><div class="modal" id="historyModal">
   <div class="modal-content" style="text-align:left">
     <h2>Sejarah Jualan</h2>
     <div class="summary-grid">
@@ -156,7 +149,6 @@ header h1 span{color:#E67E22}
     <button class="close-btn" onclick="closeModal('historyModal')">Tutup</button>
   </div>
 </div>
-
 <div class="modal" id="productModal">
   <div class="modal-content" style="text-align:left">
     <h2>Urus Produk</h2>
@@ -169,206 +161,42 @@ header h1 span{color:#E67E22}
     <div id="productList" style="margin-top:16px"></div>
   </div>
 </div>
-
 <script>
 const defaultProducts=[{id:1,name:"Nasi Lemak",price:5},{id:2,name:"Mee Goreng",price:6},{id:3,name:"Roti Canai",price:2.5},{id:4,name:"Nasi Ayam",price:7},{id:5,name:"Teh Tarik",price:2.5},{id:6,name:"Kopi O",price:2},{id:7,name:"Nescafe",price:3},{id:8,name:"Air Mineral",price:1.5},{id:9,name:"Milo",price:3},{id:10,name:"Kuih",price:1.5}];
 let products=JSON.parse(localStorage.getItem('denyanya_products')||'null');
 if(!products||!products.length)products=defaultProducts;
-let cart=[],editingId=null,currentTotal=0,cashInput='';
-let deferredPrompt=null;
+let cart=[],editingId=null,currentTotal=0,cashInput='',deferredPrompt=null;
 
-// ===== INSTALL APP =====
-window.addEventListener('beforeinstallprompt', (e) => {
-  e.preventDefault();
-  deferredPrompt = e;
-  document.getElementById('installBanner').style.display = 'block';
-});
-function installApp(){
-  if(!deferredPrompt){
-    alert('Sila tekan menu Chrome (tiga titik) → Add to Home screen / Install app');
-    return;
-  }
-  deferredPrompt.prompt();
-  deferredPrompt.userChoice.then((choice) => {
-    if(choice.outcome === 'accepted'){
-      document.getElementById('installBanner').style.display = 'none';
-    }
-    deferredPrompt = null;
-  });
-}
-window.addEventListener('appinstalled', () => {
-  document.getElementById('installBanner').style.display = 'none';
-  deferredPrompt = null;
-});
+window.addEventListener('beforeinstallprompt',function(e){e.preventDefault();deferredPrompt=e;document.getElementById('installBanner').style.display='block';});
+function installApp(){if(!deferredPrompt){alert('Tekan menu Chrome (tiga titik) → Add to Home screen');return;}deferredPrompt.prompt();deferredPrompt.userChoice.then(function(c){if(c.outcome==='accepted')document.getElementById('installBanner').style.display='none';deferredPrompt=null;});}
+window.addEventListener('appinstalled',function(){document.getElementById('installBanner').style.display='none';deferredPrompt=null;});
 
-function renderProducts(){
-  let html='';
-  for(let i=0;i<products.length;i++){
-    let p=products[i];
-    html+='<div class="product"><h3>'+p.name+'</h3><div class="price">RM '+p.price.toFixed(2)+'</div><button onclick="addToCart('+p.id+')">+ Tambah</button></div>';
-  }
-  document.getElementById('products').innerHTML=html;
-}
-function addToCart(id){
-  let p=products.find(x=>x.id===id);if(!p)return;
-  let e=cart.find(i=>i.id===id);
-  if(e)e.qty++;else cart.push({id:p.id,name:p.name,price:p.price,qty:1});
-  updateCart();
-}
-function changeQty(id,d){
-  let i=cart.find(x=>x.id===id);if(!i)return;
-  i.qty+=d;if(i.qty<=0)cart=cart.filter(x=>x.id!==id);
-  updateCart();
-}
-function updateCart(){
-  let c=document.getElementById('cart-items'),t=document.getElementById('total');
-  if(!cart.length){c.innerHTML='<div class="empty">Cart kosong</div>';t.textContent='0.00';return;}
-  let total=0,html='';
-  for(let i=0;i<cart.length;i++){
-    let item=cart[i];total+=item.price*item.qty;
-    html+='<div class="cart-item"><div><strong>'+item.name+'</strong><br><small>RM '+item.price.toFixed(2)+' x '+item.qty+'</small></div><div class="qty-controls"><button onclick="changeQty('+item.id+',-1)">-</button><span>'+item.qty+'</span><button onclick="changeQty('+item.id+',1)">+</button></div></div>';
-  }
-  c.innerHTML=html;t.textContent=total.toFixed(2);currentTotal=total;
-}
+function renderProducts(){let html='';for(let i=0;i<products.length;i++){let p=products[i];html+='<div class="product"><h3>'+p.name+'</h3><div class="price">RM '+p.price.toFixed(2)+'</div><button onclick="addToCart('+p.id+')">+ Tambah</button></div>';}document.getElementById('products').innerHTML=html;}
+function addToCart(id){let p=products.find(x=>x.id===id);if(!p)return;let e=cart.find(i=>i.id===id);if(e)e.qty++;else cart.push({id:p.id,name:p.name,price:p.price,qty:1});updateCart();}
+function changeQty(id,d){let i=cart.find(x=>x.id===id);if(!i)return;i.qty+=d;if(i.qty<=0)cart=cart.filter(x=>x.id!==id);updateCart();}
+function updateCart(){let c=document.getElementById('cart-items'),t=document.getElementById('total');if(!cart.length){c.innerHTML='<div class="empty">Cart kosong</div>';t.textContent='0.00';return;}let total=0,html='';for(let i=0;i<cart.length;i++){let item=cart[i];total+=item.price*item.qty;html+='<div class="cart-item"><div><strong>'+item.name+'</strong><br><small>RM '+item.price.toFixed(2)+' x '+item.qty+'</small></div><div class="qty-controls"><button onclick="changeQty('+item.id+',-1)">-</button><span>'+item.qty+'</span><button onclick="changeQty('+item.id+',1)">+</button></div></div>';}c.innerHTML=html;t.textContent=total.toFixed(2);currentTotal=total;}
 function clearCart(){if(cart.length&&confirm('Kosongkan cart?')){cart=[];updateCart();}}
-
-function startCashPayment(){
-  if(!cart.length)return alert('Cart kosong!');
-  currentTotal=cart.reduce((s,i)=>s+i.price*i.qty,0);
-  document.getElementById('cashTotal').textContent=currentTotal.toFixed(2);
-  cashInput='';
-  document.getElementById('cashDisplay').textContent='0';
-  document.getElementById('changeBox').style.display='none';
-  document.getElementById('cashModal').style.display='block';
-}
-function numpadPress(key){
-  if(key==='C'){cashInput='';}
-  else if(key==='.'){if(cashInput.indexOf('.')===-1)cashInput+=(cashInput===''?'0.':'.');}
-  else{if(cashInput==='0')cashInput=key;else cashInput+=key;}
-  if(cashInput.indexOf('.')>-1){
-    let parts=cashInput.split('.');
-    if(parts[1].length>2)cashInput=parts[0]+'.'+parts[1].substring(0,2);
-  }
-  document.getElementById('cashDisplay').textContent=cashInput||'0';
-  updateChange();
-}
-function updateChange(){
-  let r=parseFloat(cashInput)||0,ch=r-currentTotal;
-  let box=document.getElementById('changeBox'),amt=document.getElementById('changeAmount');
-  if(r>0){
-    box.style.display='block';
-    amt.textContent=ch>=0?'RM '+ch.toFixed(2):'Kurang RM '+Math.abs(ch).toFixed(2);
-    amt.style.color=ch>=0?'#27ae60':'#e74c3c';
-  }else box.style.display='none';
-}
-function confirmCashPayment(){
-  let r=parseFloat(cashInput)||0;
-  if(r<currentTotal)return alert('Wang tidak cukup!');
-  saveSale('Cash',r);
-  closeModal('cashModal');
-}
-function startQRPayment(){
-  if(!cart.length)return alert('Cart kosong!');
-  currentTotal=cart.reduce((s,i)=>s+i.price*i.qty,0);
-  document.getElementById('qrTotal').textContent=currentTotal.toFixed(2);
-  document.getElementById('qrModal').style.display='block';
-}
+function startCashPayment(){if(!cart.length)return alert('Cart kosong!');currentTotal=cart.reduce((s,i)=>s+i.price*i.qty,0);document.getElementById('cashTotal').textContent=currentTotal.toFixed(2);cashInput='';document.getElementById('cashDisplay').textContent='0';document.getElementById('changeBox').style.display='none';document.getElementById('cashModal').style.display='block';}
+function numpadPress(key){if(key==='C'){cashInput='';}else if(key==='.'){if(cashInput.indexOf('.')===-1)cashInput+=(cashInput===''?'0.':'.');}else{if(cashInput==='0')cashInput=key;else cashInput+=key;}if(cashInput.indexOf('.')>-1){let parts=cashInput.split('.');if(parts[1].length>2)cashInput=parts[0]+'.'+parts[1].substring(0,2);}document.getElementById('cashDisplay').textContent=cashInput||'0';updateChange();}
+function updateChange(){let r=parseFloat(cashInput)||0,ch=r-currentTotal;let box=document.getElementById('changeBox'),amt=document.getElementById('changeAmount');if(r>0){box.style.display='block';amt.textContent=ch>=0?'RM '+ch.toFixed(2):'Kurang RM '+Math.abs(ch).toFixed(2);amt.style.color=ch>=0?'#27ae60':'#e74c3c';}else box.style.display='none';}
+function confirmCashPayment(){let r=parseFloat(cashInput)||0;if(r<currentTotal)return alert('Wang tidak cukup!');saveSale('Cash',r);closeModal('cashModal');}
+function startQRPayment(){if(!cart.length)return alert('Cart kosong!');currentTotal=cart.reduce((s,i)=>s+i.price*i.qty,0);document.getElementById('qrTotal').textContent=currentTotal.toFixed(2);document.getElementById('qrModal').style.display='block';}
 function confirmQRPayment(){saveSale('QR');closeModal('qrModal');}
-
-function saveSale(method,received){
-  let sale={id:Date.now(),date:new Date().toLocaleString('ms-MY'),timestamp:Date.now(),method:method,items:cart.slice(),total:currentTotal,received:received||null};
-  let sales=JSON.parse(localStorage.getItem('denyanya_sales')||'[]');
-  sales.unshift(sale);
-  localStorage.setItem('denyanya_sales',JSON.stringify(sales));
-  let msg='Jualan berjaya!\nKaedah: '+method+'\nJumlah: RM '+currentTotal.toFixed(2);
-  if(received)msg+='\nDiterima: RM '+received.toFixed(2)+'\nBaki: RM '+(received-currentTotal).toFixed(2);
-  alert(msg);
-  cart=[];updateCart();
-}
-
-function showHistory(){
-  let sales=JSON.parse(localStorage.getItem('denyanya_sales')||'[]');
-  let now=new Date(),todayStart=new Date(now.getFullYear(),now.getMonth(),now.getDate()).getTime(),monthStart=new Date(now.getFullYear(),now.getMonth(),1).getTime();
-  let today=0,month=0,all=0,cash=0,qr=0,cashToday=0,qrToday=0;
-  for(let i=0;i<sales.length;i++){
-    let s=sales[i];
-    all+=s.total;
-    if(s.timestamp>=todayStart)today+=s.total;
-    if(s.timestamp>=monthStart)month+=s.total;
-    if(s.method==='Cash'){cash+=s.total;if(s.timestamp>=todayStart)cashToday+=s.total;}
-    if(s.method==='QR'){qr+=s.total;if(s.timestamp>=todayStart)qrToday+=s.total;}
-  }
-  document.getElementById('sumToday').textContent='RM '+today.toFixed(2);
-  document.getElementById('sumMonth').textContent='RM '+month.toFixed(2);
-  document.getElementById('sumAll').textContent='RM '+all.toFixed(2);
-  document.getElementById('sumCash').textContent='RM '+cash.toFixed(2);
-  document.getElementById('sumQR').textContent='RM '+qr.toFixed(2);
-  document.getElementById('sumCashToday').textContent='RM '+cashToday.toFixed(2);
-  document.getElementById('sumQRToday').textContent='RM '+qrToday.toFixed(2);
-
-  let groups={};
-  for(let i=0;i<sales.length;i++){
-    let s=sales[i];
-    let d=new Date(s.timestamp);
-    let key=d.getFullYear()+'-'+String(d.getMonth()+1).padStart(2,'0')+'-'+String(d.getDate()).padStart(2,'0');
-    let label=d.toLocaleDateString('ms-MY',{weekday:'short',day:'numeric',month:'short',year:'numeric'});
-    if(!groups[key])groups[key]={label:label,total:0,sales:[]};
-    groups[key].total+=s.total;
-    groups[key].sales.push(s);
-  }
-  let list=document.getElementById('historyList');
-  let keys=Object.keys(groups).sort().reverse();
-  if(!keys.length){list.innerHTML='<div class="empty">Belum ada jualan</div>';}
-  else{
-    let html='';
-    for(let k=0;k<keys.length;k++){
-      let g=groups[keys[k]];
-      let salesHtml='';
-      for(let j=0;j<g.sales.length;j++){
-        let s=g.sales[j],items='';
-        for(let m=0;m<s.items.length;m++)items+=s.items[m].name+' x'+s.items[m].qty+(m<s.items.length-1?', ':'');
-        let time=new Date(s.timestamp).toLocaleTimeString('ms-MY',{hour:'2-digit',minute:'2-digit'});
-        salesHtml+='<div class="sale-item"><div class="top"><div><strong>'+time+'</strong> • '+s.method+' • RM '+s.total.toFixed(2)+(s.received?'<br><small>Diterima: RM '+s.received.toFixed(2)+'</small>':'')+'<br><small>'+items+'</small></div><button class="btn-del" onclick="deleteSale('+s.id+')">Padam</button></div></div>';
-      }
-      html+='<div class="date-folder"><div class="date-header" onclick="toggleDate(this)"><span>'+g.label+' • RM '+g.total.toFixed(2)+'</span><span class="arrow">▶</span></div><div class="date-sales">'+salesHtml+'</div></div>';
-    }
-    list.innerHTML=html;
-  }
-  document.getElementById('historyModal').style.display='block';
-}
-function toggleDate(el){
-  el.classList.toggle('open');
-  el.nextElementSibling.classList.toggle('show');
-}
+function saveSale(method,received){let sale={id:Date.now(),date:new Date().toLocaleString('ms-MY'),timestamp:Date.now(),method:method,items:cart.slice(),total:currentTotal,received:received||null};let sales=JSON.parse(localStorage.getItem('denyanya_sales')||'[]');sales.unshift(sale);localStorage.setItem('denyanya_sales',JSON.stringify(sales));let msg='Jualan berjaya!\nKaedah: '+method+'\nJumlah: RM '+currentTotal.toFixed(2);if(received)msg+='\nDiterima: RM '+received.toFixed(2)+'\nBaki: RM '+(received-currentTotal).toFixed(2);alert(msg);cart=[];updateCart();}
+function showHistory(){let sales=JSON.parse(localStorage.getItem('denyanya_sales')||'[]');let now=new Date(),todayStart=new Date(now.getFullYear(),now.getMonth(),now.getDate()).getTime(),monthStart=new Date(now.getFullYear(),now.getMonth(),1).getTime();let today=0,month=0,all=0,cash=0,qr=0,cashToday=0,qrToday=0;for(let i=0;i<sales.length;i++){let s=sales[i];all+=s.total;if(s.timestamp>=todayStart)today+=s.total;if(s.timestamp>=monthStart)month+=s.total;if(s.method==='Cash'){cash+=s.total;if(s.timestamp>=todayStart)cashToday+=s.total;}if(s.method==='QR'){qr+=s.total;if(s.timestamp>=todayStart)qrToday+=s.total;}}document.getElementById('sumToday').textContent='RM '+today.toFixed(2);document.getElementById('sumMonth').textContent='RM '+month.toFixed(2);document.getElementById('sumAll').textContent='RM '+all.toFixed(2);document.getElementById('sumCash').textContent='RM '+cash.toFixed(2);document.getElementById('sumQR').textContent='RM '+qr.toFixed(2);document.getElementById('sumCashToday').textContent='RM '+cashToday.toFixed(2);document.getElementById('sumQRToday').textContent='RM '+qrToday.toFixed(2);let groups={};for(let i=0;i<sales.length;i++){let s=sales[i];let d=new Date(s.timestamp);let key=d.getFullYear()+'-'+String(d.getMonth()+1).padStart(2,'0')+'-'+String(d.getDate()).padStart(2,'0');let label=d.toLocaleDateString('ms-MY',{weekday:'short',day:'numeric',month:'short',year:'numeric'});if(!groups[key])groups[key]={label:label,total:0,sales:[]};groups[key].total+=s.total;groups[key].sales.push(s);}let list=document.getElementById('historyList');let keys=Object.keys(groups).sort().reverse();if(!keys.length){list.innerHTML='<div class="empty">Belum ada jualan</div>';}else{let html='';for(let k=0;k<keys.length;k++){let g=groups[keys[k]];let salesHtml='';for(let j=0;j<g.sales.length;j++){let s=g.sales[j],items='';for(let m=0;m<s.items.length;m++)items+=s.items[m].name+' x'+s.items[m].qty+(m<s.items.length-1?', ':'');let time=new Date(s.timestamp).toLocaleTimeString('ms-MY',{hour:'2-digit',minute:'2-digit'});salesHtml+='<div class="sale-item"><div class="top"><div><strong>'+time+'</strong> • '+s.method+' • RM '+s.total.toFixed(2)+(s.received?'<br><small>Diterima: RM '+s.received.toFixed(2)+'</small>':'')+'<br><small>'+items+'</small></div><button class="btn-del" onclick="deleteSale('+s.id+')">Padam</button></div></div>';}html+='<div class="date-folder"><div class="date-header" onclick="toggleDate(this)"><span>'+g.label+' • RM '+g.total.toFixed(2)+'</span><span class="arrow">▶</span></div><div class="date-sales">'+salesHtml+'</div></div>';}list.innerHTML=html;}document.getElementById('historyModal').style.display='block';}
+function toggleDate(el){el.classList.toggle('open');el.nextElementSibling.classList.toggle('show');}
 function deleteSale(id){if(!confirm('Padam?'))return;let sales=JSON.parse(localStorage.getItem('denyanya_sales')||'[]').filter(s=>s.id!==id);localStorage.setItem('denyanya_sales',JSON.stringify(sales));showHistory();}
 function clearAllSales(){if(!confirm('Padam semua?'))return;localStorage.setItem('denyanya_sales','[]');showHistory();}
-
 function showProductManager(){editingId=null;document.getElementById('prodName').value='';document.getElementById('prodPrice').value='';renderProductList();document.getElementById('productModal').style.display='block';}
-function renderProductList(){
-  let html='';
-  for(let i=0;i<products.length;i++){
-    let p=products[i];
-    html+='<div class="product-edit-item"><div class="top"><div><strong>'+p.name+'</strong><br>RM '+p.price.toFixed(2)+'</div><div><button class="btn-del" style="background:#2980b9;margin-right:6px" onclick="editProduct('+p.id+')">Edit</button><button class="btn-del" onclick="deleteProduct('+p.id+')">Padam</button></div></div></div>';
-  }
-  document.getElementById('productList').innerHTML=html;
-}
-function saveProduct(){
-  let name=document.getElementById('prodName').value.trim(),price=parseFloat(document.getElementById('prodPrice').value);
-  if(!name||isNaN(price)||price<0)return alert('Masukkan nama & harga betul');
-  if(editingId){let p=products.find(x=>x.id===editingId);if(p){p.name=name;p.price=price;}}
-  else{let newId=products.length?Math.max(...products.map(p=>p.id))+1:1;products.push({id:newId,name:name,price:price});}
-  localStorage.setItem('denyanya_products',JSON.stringify(products));
-  renderProducts();renderProductList();editingId=null;
-  document.getElementById('prodName').value='';document.getElementById('prodPrice').value='';
-  alert('Berjaya!');
-}
+function renderProductList(){let html='';for(let i=0;i<products.length;i++){let p=products[i];html+='<div class="product-edit-item"><div class="top"><div><strong>'+p.name+'</strong><br>RM '+p.price.toFixed(2)+'</div><div><button class="btn-del" style="background:#2980b9;margin-right:6px" onclick="editProduct('+p.id+')">Edit</button><button class="btn-del" onclick="deleteProduct('+p.id+')">Padam</button></div></div></div>';}document.getElementById('productList').innerHTML=html;}
+function saveProduct(){let name=document.getElementById('prodName').value.trim(),price=parseFloat(document.getElementById('prodPrice').value);if(!name||isNaN(price)||price<0)return alert('Masukkan nama & harga betul');if(editingId){let p=products.find(x=>x.id===editingId);if(p){p.name=name;p.price=price;}}else{let newId=products.length?Math.max(...products.map(p=>p.id))+1:1;products.push({id:newId,name:name,price:price});}localStorage.setItem('denyanya_products',JSON.stringify(products));renderProducts();renderProductList();editingId=null;document.getElementById('prodName').value='';document.getElementById('prodPrice').value='';alert('Berjaya!');}
 function editProduct(id){let p=products.find(x=>x.id===id);if(!p)return;editingId=id;document.getElementById('prodName').value=p.name;document.getElementById('prodPrice').value=p.price;}
 function deleteProduct(id){if(!confirm('Padam produk?'))return;products=products.filter(p=>p.id!==id);localStorage.setItem('denyanya_products',JSON.stringify(products));renderProducts();renderProductList();}
 function closeModal(id){document.getElementById(id).style.display='none';}
 
 renderProducts();
 updateCart();
-if('serviceWorker' in navigator)navigator.serviceWorker.register('sw.js').catch(function(){});
+if('serviceWorker' in navigator){window.addEventListener('load',function(){navigator.serviceWorker.register('./sw.js').then(function(reg){console.log('SW ok',reg);}).catch(function(err){console.log('SW fail',err);});});}
 </script>
 </body>
 </html>
