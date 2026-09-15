@@ -62,6 +62,7 @@ header h1 span{color:#E67E22}
 .sale-item{background:#fafafa;padding:12px;border-radius:10px;margin-bottom:8px;font-size:.88rem;text-align:left;border:1px solid #eee}
 .sale-item .top{display:flex;justify-content:space-between;gap:8px}
 .btn-del{background:#e74c3c;color:#fff;border:none;padding:6px 10px;border-radius:8px;font-size:.78rem}
+.btn-wa{background:#25D366;color:#fff;border:none;padding:10px;border-radius:10px;font-size:.85rem;font-weight:600;width:100%;margin-top:8px}
 .product-edit-item{background:#FFF8F0;padding:12px;border-radius:12px;margin-bottom:8px;font-size:.9rem;text-align:left}
 .product-edit-item .top{display:flex;justify-content:space-between;gap:8px}
 .close-btn,.save-btn{background:#E67E22;color:#fff;border:none;padding:14px;width:100%;border-radius:14px;margin-top:12px;font-weight:600}
@@ -158,7 +159,6 @@ header h1 span{color:#E67E22}
       <button class="close-btn" style="margin-top:0" onclick="closeModal('productModal')">Tutup</button>
     </div>
     <div id="productList" style="margin-top:16px"></div>
-
     <div class="setting-section">
       <h3>QR Pembayaran</h3>
       <div class="qr-image" style="width:160px;height:160px;margin:0 auto 10px">
@@ -176,24 +176,8 @@ if(!products||!products.length)products=defaultProducts;
 let cart=[],editingId=null,currentTotal=0,cashInput='';
 const defaultQR='https://api.qrserver.com/v1/create-qr-code/?size=200x200&data=DeNyaNya';
 
-function loadQR(){
-  let saved=localStorage.getItem('denyanya_qr');
-  let src=saved||defaultQR;
-  document.getElementById('qrImg').src=src;
-  document.getElementById('qrPreview').src=src;
-}
-function handleQRUpload(e){
-  let file=e.target.files[0];
-  if(!file)return;
-  if(!file.type.startsWith('image/')){alert('Sila pilih gambar sahaja');return;}
-  let reader=new FileReader();
-  reader.onload=function(ev){
-    localStorage.setItem('denyanya_qr',ev.target.result);
-    loadQR();
-    alert('QR berjaya disimpan!');
-  };
-  reader.readAsDataURL(file);
-}
+function loadQR(){let saved=localStorage.getItem('denyanya_qr');let src=saved||defaultQR;document.getElementById('qrImg').src=src;document.getElementById('qrPreview').src=src;}
+function handleQRUpload(e){let file=e.target.files[0];if(!file)return;if(!file.type.startsWith('image/')){alert('Sila pilih gambar sahaja');return;}let reader=new FileReader();reader.onload=function(ev){localStorage.setItem('denyanya_qr',ev.target.result);loadQR();alert('QR berjaya disimpan!');};reader.readAsDataURL(file);}
 
 function renderProducts(){let html='';for(let i=0;i<products.length;i++){let p=products[i];html+='<div class="product"><h3>'+p.name+'</h3><div class="price">RM '+p.price.toFixed(2)+'</div><button onclick="addToCart('+p.id+')">+ Tambah</button></div>';}document.getElementById('products').innerHTML=html;}
 function addToCart(id){let p=products.find(x=>x.id===id);if(!p)return;let e=cart.find(i=>i.id===id);if(e)e.qty++;else cart.push({id:p.id,name:p.name,price:p.price,qty:1});updateCart();}
@@ -207,7 +191,87 @@ function confirmCashPayment(){let r=parseFloat(cashInput)||0;if(r<currentTotal)r
 function startQRPayment(){if(!cart.length)return alert('Cart kosong!');currentTotal=cart.reduce((s,i)=>s+i.price*i.qty,0);document.getElementById('qrTotal').textContent=currentTotal.toFixed(2);loadQR();document.getElementById('qrModal').style.display='block';}
 function confirmQRPayment(){saveSale('QR');closeModal('qrModal');}
 function saveSale(method,received){let sale={id:Date.now(),date:new Date().toLocaleString('ms-MY'),timestamp:Date.now(),method:method,items:cart.slice(),total:currentTotal,received:received||null};let sales=JSON.parse(localStorage.getItem('denyanya_sales')||'[]');sales.unshift(sale);localStorage.setItem('denyanya_sales',JSON.stringify(sales));let msg='Jualan berjaya!\nKaedah: '+method+'\nJumlah: RM '+currentTotal.toFixed(2);if(received)msg+='\nDiterima: RM '+received.toFixed(2)+'\nBaki: RM '+(received-currentTotal).toFixed(2);alert(msg);cart=[];updateCart();}
-function showHistory(){let sales=JSON.parse(localStorage.getItem('denyanya_sales')||'[]');let now=new Date(),todayStart=new Date(now.getFullYear(),now.getMonth(),now.getDate()).getTime(),monthStart=new Date(now.getFullYear(),now.getMonth(),1).getTime();let today=0,month=0,all=0,cash=0,qr=0,cashToday=0,qrToday=0;for(let i=0;i<sales.length;i++){let s=sales[i];all+=s.total;if(s.timestamp>=todayStart)today+=s.total;if(s.timestamp>=monthStart)month+=s.total;if(s.method==='Cash'){cash+=s.total;if(s.timestamp>=todayStart)cashToday+=s.total;}if(s.method==='QR'){qr+=s.total;if(s.timestamp>=todayStart)qrToday+=s.total;}}document.getElementById('sumToday').textContent='RM '+today.toFixed(2);document.getElementById('sumMonth').textContent='RM '+month.toFixed(2);document.getElementById('sumAll').textContent='RM '+all.toFixed(2);document.getElementById('sumCash').textContent='RM '+cash.toFixed(2);document.getElementById('sumQR').textContent='RM '+qr.toFixed(2);document.getElementById('sumCashToday').textContent='RM '+cashToday.toFixed(2);document.getElementById('sumQRToday').textContent='RM '+qrToday.toFixed(2);let groups={};for(let i=0;i<sales.length;i++){let s=sales[i];let d=new Date(s.timestamp);let key=d.getFullYear()+'-'+String(d.getMonth()+1).padStart(2,'0')+'-'+String(d.getDate()).padStart(2,'0');let label=d.toLocaleDateString('ms-MY',{weekday:'short',day:'numeric',month:'short',year:'numeric'});if(!groups[key])groups[key]={label:label,total:0,sales:[]};groups[key].total+=s.total;groups[key].sales.push(s);}let list=document.getElementById('historyList');let keys=Object.keys(groups).sort().reverse();if(!keys.length){list.innerHTML='<div class="empty">Belum ada jualan</div>';}else{let html='';for(let k=0;k<keys.length;k++){let g=groups[keys[k]];let salesHtml='';for(let j=0;j<g.sales.length;j++){let s=g.sales[j],items='';for(let m=0;m<s.items.length;m++)items+=s.items[m].name+' x'+s.items[m].qty+(m<s.items.length-1?', ':'');let time=new Date(s.timestamp).toLocaleTimeString('ms-MY',{hour:'2-digit',minute:'2-digit'});salesHtml+='<div class="sale-item"><div class="top"><div><strong>'+time+'</strong> • '+s.method+' • RM '+s.total.toFixed(2)+(s.received?'<br><small>Diterima: RM '+s.received.toFixed(2)+'</small>':'')+'<br><small>'+items+'</small></div><button class="btn-del" onclick="deleteSale('+s.id+')">Padam</button></div></div>';}html+='<div class="date-folder"><div class="date-header" onclick="toggleDate(this)"><span>'+g.label+' • RM '+g.total.toFixed(2)+'</span><span class="arrow">▶</span></div><div class="date-sales">'+salesHtml+'</div></div>';}list.innerHTML=html;}document.getElementById('historyModal').style.display='block';}
+
+function shareDayWhatsApp(dateKey){
+  let sales=JSON.parse(localStorage.getItem('denyanya_sales')||'[]');
+  let daySales=sales.filter(s=>{
+    let d=new Date(s.timestamp);
+    let key=d.getFullYear()+'-'+String(d.getMonth()+1).padStart(2,'0')+'-'+String(d.getDate()).padStart(2,'0');
+    return key===dateKey;
+  });
+  if(!daySales.length)return alert('Tiada jualan hari ini');
+  let total=0,cash=0,qr=0;
+  let lines=[];
+  daySales.forEach(s=>{
+    total+=s.total;
+    if(s.method==='Cash')cash+=s.total;else qr+=s.total;
+    let time=new Date(s.timestamp).toLocaleTimeString('ms-MY',{hour:'2-digit',minute:'2-digit'});
+    let items=s.items.map(i=>i.name+' x'+i.qty).join(', ');
+    lines.push(time+' | '+s.method+' | RM '+s.total.toFixed(2)+'\n  '+items);
+  });
+  let d=new Date(daySales[0].timestamp);
+  let label=d.toLocaleDateString('ms-MY',{weekday:'long',day:'numeric',month:'long',year:'numeric'});
+  let text='*DE NYA NYA - Laporan Jualan*\n';
+  text+=label+'\n';
+  text+='━━━━━━━━━━━━\n';
+  text+='*Total:* RM '+total.toFixed(2)+'\n';
+  text+='Cash: RM '+cash.toFixed(2)+'\n';
+  text+='QR: RM '+qr.toFixed(2)+'\n';
+  text+='━━━━━━━━━━━━\n';
+  text+=lines.join('\n\n');
+  text+='\n\n_Dihantar dari app De Nya Nya_';
+  window.open('https://wa.me/?text='+encodeURIComponent(text),'_blank');
+}
+
+function showHistory(){
+  let sales=JSON.parse(localStorage.getItem('denyanya_sales')||'[]');
+  let now=new Date(),todayStart=new Date(now.getFullYear(),now.getMonth(),now.getDate()).getTime(),monthStart=new Date(now.getFullYear(),now.getMonth(),1).getTime();
+  let today=0,month=0,all=0,cash=0,qr=0,cashToday=0,qrToday=0;
+  for(let i=0;i<sales.length;i++){
+    let s=sales[i];all+=s.total;
+    if(s.timestamp>=todayStart)today+=s.total;
+    if(s.timestamp>=monthStart)month+=s.total;
+    if(s.method==='Cash'){cash+=s.total;if(s.timestamp>=todayStart)cashToday+=s.total;}
+    if(s.method==='QR'){qr+=s.total;if(s.timestamp>=todayStart)qrToday+=s.total;}
+  }
+  document.getElementById('sumToday').textContent='RM '+today.toFixed(2);
+  document.getElementById('sumMonth').textContent='RM '+month.toFixed(2);
+  document.getElementById('sumAll').textContent='RM '+all.toFixed(2);
+  document.getElementById('sumCash').textContent='RM '+cash.toFixed(2);
+  document.getElementById('sumQR').textContent='RM '+qr.toFixed(2);
+  document.getElementById('sumCashToday').textContent='RM '+cashToday.toFixed(2);
+  document.getElementById('sumQRToday').textContent='RM '+qrToday.toFixed(2);
+
+  let groups={};
+  for(let i=0;i<sales.length;i++){
+    let s=sales[i];
+    let d=new Date(s.timestamp);
+    let key=d.getFullYear()+'-'+String(d.getMonth()+1).padStart(2,'0')+'-'+String(d.getDate()).padStart(2,'0');
+    let label=d.toLocaleDateString('ms-MY',{weekday:'short',day:'numeric',month:'short',year:'numeric'});
+    if(!groups[key])groups[key]={label:label,total:0,sales:[]};
+    groups[key].total+=s.total;
+    groups[key].sales.push(s);
+  }
+  let list=document.getElementById('historyList');
+  let keys=Object.keys(groups).sort().reverse();
+  if(!keys.length){list.innerHTML='<div class="empty">Belum ada jualan</div>';}
+  else{
+    let html='';
+    for(let k=0;k<keys.length;k++){
+      let g=groups[keys[k]];
+      let salesHtml='';
+      for(let j=0;j<g.sales.length;j++){
+        let s=g.sales[j],items='';
+        for(let m=0;m<s.items.length;m++)items+=s.items[m].name+' x'+s.items[m].qty+(m<s.items.length-1?', ':'');
+        let time=new Date(s.timestamp).toLocaleTimeString('ms-MY',{hour:'2-digit',minute:'2-digit'});
+        salesHtml+='<div class="sale-item"><div class="top"><div><strong>'+time+'</strong> • '+s.method+' • RM '+s.total.toFixed(2)+(s.received?'<br><small>Diterima: RM '+s.received.toFixed(2)+'</small>':'')+'<br><small>'+items+'</small></div><button class="btn-del" onclick="deleteSale('+s.id+')">Padam</button></div></div>';
+      }
+      html+='<div class="date-folder"><div class="date-header" onclick="toggleDate(this)"><span>'+g.label+' • RM '+g.total.toFixed(2)+'</span><span class="arrow">▶</span></div><div class="date-sales">'+salesHtml+'<button class="btn-wa" onclick="shareDayWhatsApp(\''+keys[k]+'\')">Hantar WhatsApp</button></div></div>';
+    }
+    list.innerHTML=html;
+  }
+  document.getElementById('historyModal').style.display='block';
+}
 function toggleDate(el){el.classList.toggle('open');el.nextElementSibling.classList.toggle('show');}
 function deleteSale(id){if(!confirm('Padam?'))return;let sales=JSON.parse(localStorage.getItem('denyanya_sales')||'[]').filter(s=>s.id!==id);localStorage.setItem('denyanya_sales',JSON.stringify(sales));showHistory();}
 function clearAllSales(){if(!confirm('Padam semua?'))return;localStorage.setItem('denyanya_sales','[]');showHistory();}
@@ -218,9 +282,7 @@ function editProduct(id){let p=products.find(x=>x.id===id);if(!p)return;editingI
 function deleteProduct(id){if(!confirm('Padam produk?'))return;products=products.filter(p=>p.id!==id);localStorage.setItem('denyanya_products',JSON.stringify(products));renderProducts();renderProductList();}
 function closeModal(id){document.getElementById(id).style.display='none';}
 
-renderProducts();
-updateCart();
-loadQR();
+renderProducts();updateCart();loadQR();
 if('serviceWorker' in navigator){window.addEventListener('load',function(){navigator.serviceWorker.register('./sw.js').catch(function(){});});}
 </script>
 </body>
