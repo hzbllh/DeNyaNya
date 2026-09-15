@@ -14,8 +14,6 @@ header{background:#fff;padding:14px 16px 12px;text-align:center;border-bottom:3p
 header img{height:52px;margin-bottom:6px;object-fit:contain}
 header h1{font-size:1.45rem;font-weight:800}
 header h1 span{color:#E67E22}
-.install-banner{display:none;background:#E67E22;color:#fff;padding:12px 16px;text-align:center;font-size:.95rem;font-weight:600}
-.install-banner button{background:#fff;color:#E67E22;border:none;padding:8px 18px;border-radius:20px;font-weight:700;margin-left:10px;font-size:.9rem}
 .products{display:grid;grid-template-columns:1fr 1fr;gap:12px;padding:14px}
 .product{background:#fff;border-radius:16px;padding:16px 12px;text-align:center;border:1px solid #f0e6d8}
 .product h3{font-size:.95rem;margin-bottom:6px}
@@ -46,9 +44,9 @@ header h1 span{color:#E67E22}
 .numpad .btn-clear-num{background:#ffebee;color:#e74c3c}
 .btn-confirm{background:#27ae60;color:#fff;border:none;padding:15px;width:100%;border-radius:14px;font-size:1.05rem;font-weight:600}
 .btn-cancel{background:#f0f0f0;color:#555;border:none;padding:13px;width:100%;border-radius:14px;margin-top:8px}
-.qr-image{width:220px;height:220px;margin:8px auto 12px;display:flex;align-items:center;justify-content:center;border:2px dashed #ddd;border-radius:16px;background:#fafafa;overflow:hidden}
+.qr-image{width:220px;height:220px;margin:8px auto 16px;display:flex;align-items:center;justify-content:center;border:2px dashed #ddd;border-radius:16px;background:#fafafa;overflow:hidden}
 .qr-image img{width:100%;height:100%;object-fit:contain}
-.btn-qr-change{background:#f5f0e8;color:#555;border:none;padding:10px 16px;border-radius:10px;font-size:.85rem;margin-bottom:12px}
+.btn-qr-change{background:#E67E22;color:#fff;border:none;padding:12px 18px;border-radius:12px;font-size:.95rem;font-weight:600;margin:10px 0 16px;width:100%}
 .summary-grid{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:16px}
 .summary-item{background:#FFF8F0;border-radius:12px;padding:10px 8px;text-align:center}
 .summary-item .label{font-size:.68rem;color:#888}
@@ -73,13 +71,11 @@ header h1 span{color:#E67E22}
 .form-group label{display:block;font-size:.85rem;color:#666;margin-bottom:5px}
 .form-group input{width:100%;padding:12px;border-radius:12px;border:1px solid #ddd;font-size:1rem}
 .form-actions{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+.setting-section{margin-top:20px;padding-top:16px;border-top:1px solid #eee;text-align:left}
+.setting-section h3{font-size:1rem;margin-bottom:10px;color:#555}
 </style>
 </head>
 <body>
-<div class="install-banner" id="installBanner">
-  Install De Nya Nya sebagai App
-  <button onclick="installApp()">Install</button>
-</div>
 <header>
   <img src="https://raw.githubusercontent.com/hzbllh/DeNyaNya/refs/heads/main/IMG-20250730-WA0008.jpg" alt="Logo">
   <h1>DE <span>NYA</span> NYA.</h1>
@@ -89,18 +85,18 @@ header h1 span{color:#E67E22}
   <div class="cart-header"><h2>Cart</h2><div class="total">RM <span id="total">0.00</span></div></div>
   <div class="cart-items" id="cart-items"><div class="empty">Cart kosong</div></div>
   <div class="actions">
-    <button class="btn-cash" onclick="startCashPayment()">Bayar Cash</button>
-    <button class="btn-qr" onclick="startQRPayment()">Bayar QR</button>
-    <button class="btn-clear" onclick="clearCart()">Kosongkan Cart</button>
+    <button class="btn-cash" onclick="startCashPayment()">Cash</button>
+    <button class="btn-qr" onclick="startQRPayment()">QR</button>
+    <button class="btn-clear" onclick="clearCart()">Clear</button>
   </div>
   <div class="bottom-btns">
-    <button onclick="showHistory()">Sejarah Jualan</button>
-    <button onclick="showProductManager()">Urus Produk</button>
+    <button onclick="showHistory()">Sales</button>
+    <button onclick="showProductManager()">Setting</button>
   </div>
 </div>
 <div class="modal" id="cashModal">
   <div class="modal-content">
-    <h2>Bayar Cash</h2>
+    <h2>Cash</h2>
     <div class="amount">Jumlah: RM <span id="cashTotal">0.00</span></div>
     <div class="display-box" id="cashDisplay">0</div>
     <div class="change-box" id="changeBox" style="display:none">
@@ -121,25 +117,23 @@ header h1 span{color:#E67E22}
       <button onclick="numpadPress('0')">0</button>
       <button onclick="numpadPress('.')">.</button>
     </div>
-    <button class="btn-confirm" onclick="confirmCashPayment()">Sahkan Pembayaran</button>
+    <button class="btn-confirm" onclick="confirmCashPayment()">Sahkan</button>
     <button class="btn-cancel" onclick="closeModal('cashModal')">Batal</button>
   </div>
 </div><div class="modal" id="qrModal">
   <div class="modal-content">
-    <h2>Bayar QR</h2>
+    <h2>QR</h2>
     <div class="amount">Jumlah: RM <span id="qrTotal">0.00</span></div>
-    <div class="qr-image" id="qrImageBox">
+    <div class="qr-image">
       <img id="qrImg" src="https://api.qrserver.com/v1/create-qr-code/?size=200x200&data=DeNyaNya" alt="QR">
     </div>
-    <input type="file" id="qrFileInput" accept="image/*" style="display:none" onchange="handleQRUpload(event)">
-    <button class="btn-qr-change" onclick="document.getElementById('qrFileInput').click()">Tukar QR</button>
-    <button class="btn-confirm" onclick="confirmQRPayment()">Sahkan Pembayaran</button>
+    <button class="btn-confirm" onclick="confirmQRPayment()">Sahkan</button>
     <button class="btn-cancel" onclick="closeModal('qrModal')">Batal</button>
   </div>
 </div>
 <div class="modal" id="historyModal">
   <div class="modal-content" style="text-align:left">
-    <h2>Sejarah Jualan</h2>
+    <h2>Sales</h2>
     <div class="summary-grid">
       <div class="summary-item"><div class="label">Hari Ini</div><div class="value" id="sumToday">RM 0.00</div></div>
       <div class="summary-item"><div class="label">Bulan Ini</div><div class="value" id="sumMonth">RM 0.00</div></div>
@@ -156,30 +150,37 @@ header h1 span{color:#E67E22}
 </div>
 <div class="modal" id="productModal">
   <div class="modal-content" style="text-align:left">
-    <h2>Urus Produk</h2>
-    <div class="form-group"><label>Nama</label><input type="text" id="prodName"></div>
+    <h2>Setting</h2>
+    <div class="form-group"><label>Nama Produk</label><input type="text" id="prodName"></div>
     <div class="form-group"><label>Harga (RM)</label><input type="number" id="prodPrice" step="0.50"></div>
     <div class="form-actions">
       <button class="save-btn" onclick="saveProduct()">Simpan</button>
       <button class="close-btn" style="margin-top:0" onclick="closeModal('productModal')">Tutup</button>
     </div>
     <div id="productList" style="margin-top:16px"></div>
+
+    <div class="setting-section">
+      <h3>QR Pembayaran</h3>
+      <div class="qr-image" style="width:160px;height:160px;margin:0 auto 10px">
+        <img id="qrPreview" src="https://api.qrserver.com/v1/create-qr-code/?size=200x200&data=DeNyaNya" alt="QR">
+      </div>
+      <input type="file" id="qrFileInput" accept="image/*" style="display:none" onchange="handleQRUpload(event)">
+      <button class="btn-qr-change" onclick="document.getElementById('qrFileInput').click()">Tukar QR</button>
+    </div>
   </div>
 </div>
 <script>
 const defaultProducts=[{id:1,name:"Nasi Lemak",price:5},{id:2,name:"Mee Goreng",price:6},{id:3,name:"Roti Canai",price:2.5},{id:4,name:"Nasi Ayam",price:7},{id:5,name:"Teh Tarik",price:2.5},{id:6,name:"Kopi O",price:2},{id:7,name:"Nescafe",price:3},{id:8,name:"Air Mineral",price:1.5},{id:9,name:"Milo",price:3},{id:10,name:"Kuih",price:1.5}];
 let products=JSON.parse(localStorage.getItem('denyanya_products')||'null');
 if(!products||!products.length)products=defaultProducts;
-let cart=[],editingId=null,currentTotal=0,cashInput='',deferredPrompt=null;
+let cart=[],editingId=null,currentTotal=0,cashInput='';
 const defaultQR='https://api.qrserver.com/v1/create-qr-code/?size=200x200&data=DeNyaNya';
-
-window.addEventListener('beforeinstallprompt',function(e){e.preventDefault();deferredPrompt=e;document.getElementById('installBanner').style.display='block';});
-function installApp(){if(!deferredPrompt){alert('Tekan menu Chrome → Add to Home screen');return;}deferredPrompt.prompt();deferredPrompt.userChoice.then(function(c){if(c.outcome==='accepted')document.getElementById('installBanner').style.display='none';deferredPrompt=null;});}
-window.addEventListener('appinstalled',function(){document.getElementById('installBanner').style.display='none';deferredPrompt=null;});
 
 function loadQR(){
   let saved=localStorage.getItem('denyanya_qr');
-  document.getElementById('qrImg').src=saved||defaultQR;
+  let src=saved||defaultQR;
+  document.getElementById('qrImg').src=src;
+  document.getElementById('qrPreview').src=src;
 }
 function handleQRUpload(e){
   let file=e.target.files[0];
@@ -187,9 +188,8 @@ function handleQRUpload(e){
   if(!file.type.startsWith('image/')){alert('Sila pilih gambar sahaja');return;}
   let reader=new FileReader();
   reader.onload=function(ev){
-    let base64=ev.target.result;
-    localStorage.setItem('denyanya_qr',base64);
-    document.getElementById('qrImg').src=base64;
+    localStorage.setItem('denyanya_qr',ev.target.result);
+    loadQR();
     alert('QR berjaya disimpan!');
   };
   reader.readAsDataURL(file);
@@ -199,7 +199,7 @@ function renderProducts(){let html='';for(let i=0;i<products.length;i++){let p=p
 function addToCart(id){let p=products.find(x=>x.id===id);if(!p)return;let e=cart.find(i=>i.id===id);if(e)e.qty++;else cart.push({id:p.id,name:p.name,price:p.price,qty:1});updateCart();}
 function changeQty(id,d){let i=cart.find(x=>x.id===id);if(!i)return;i.qty+=d;if(i.qty<=0)cart=cart.filter(x=>x.id!==id);updateCart();}
 function updateCart(){let c=document.getElementById('cart-items'),t=document.getElementById('total');if(!cart.length){c.innerHTML='<div class="empty">Cart kosong</div>';t.textContent='0.00';return;}let total=0,html='';for(let i=0;i<cart.length;i++){let item=cart[i];total+=item.price*item.qty;html+='<div class="cart-item"><div><strong>'+item.name+'</strong><br><small>RM '+item.price.toFixed(2)+' x '+item.qty+'</small></div><div class="qty-controls"><button onclick="changeQty('+item.id+',-1)">-</button><span>'+item.qty+'</span><button onclick="changeQty('+item.id+',1)">+</button></div></div>';}c.innerHTML=html;t.textContent=total.toFixed(2);currentTotal=total;}
-function clearCart(){if(cart.length&&confirm('Kosongkan cart?')){cart=[];updateCart();}}
+function clearCart(){if(cart.length&&confirm('Clear cart?')){cart=[];updateCart();}}
 function startCashPayment(){if(!cart.length)return alert('Cart kosong!');currentTotal=cart.reduce((s,i)=>s+i.price*i.qty,0);document.getElementById('cashTotal').textContent=currentTotal.toFixed(2);cashInput='';document.getElementById('cashDisplay').textContent='0';document.getElementById('changeBox').style.display='none';document.getElementById('cashModal').style.display='block';}
 function numpadPress(key){if(key==='C'){cashInput='';}else if(key==='.'){if(cashInput.indexOf('.')===-1)cashInput+=(cashInput===''?'0.':'.');}else{if(cashInput==='0')cashInput=key;else cashInput+=key;}if(cashInput.indexOf('.')>-1){let parts=cashInput.split('.');if(parts[1].length>2)cashInput=parts[0]+'.'+parts[1].substring(0,2);}document.getElementById('cashDisplay').textContent=cashInput||'0';updateChange();}
 function updateChange(){let r=parseFloat(cashInput)||0,ch=r-currentTotal;let box=document.getElementById('changeBox'),amt=document.getElementById('changeAmount');if(r>0){box.style.display='block';amt.textContent=ch>=0?'RM '+ch.toFixed(2):'Kurang RM '+Math.abs(ch).toFixed(2);amt.style.color=ch>=0?'#27ae60':'#e74c3c';}else box.style.display='none';}
@@ -211,7 +211,7 @@ function showHistory(){let sales=JSON.parse(localStorage.getItem('denyanya_sales
 function toggleDate(el){el.classList.toggle('open');el.nextElementSibling.classList.toggle('show');}
 function deleteSale(id){if(!confirm('Padam?'))return;let sales=JSON.parse(localStorage.getItem('denyanya_sales')||'[]').filter(s=>s.id!==id);localStorage.setItem('denyanya_sales',JSON.stringify(sales));showHistory();}
 function clearAllSales(){if(!confirm('Padam semua?'))return;localStorage.setItem('denyanya_sales','[]');showHistory();}
-function showProductManager(){editingId=null;document.getElementById('prodName').value='';document.getElementById('prodPrice').value='';renderProductList();document.getElementById('productModal').style.display='block';}
+function showProductManager(){editingId=null;document.getElementById('prodName').value='';document.getElementById('prodPrice').value='';renderProductList();loadQR();document.getElementById('productModal').style.display='block';}
 function renderProductList(){let html='';for(let i=0;i<products.length;i++){let p=products[i];html+='<div class="product-edit-item"><div class="top"><div><strong>'+p.name+'</strong><br>RM '+p.price.toFixed(2)+'</div><div><button class="btn-del" style="background:#2980b9;margin-right:6px" onclick="editProduct('+p.id+')">Edit</button><button class="btn-del" onclick="deleteProduct('+p.id+')">Padam</button></div></div></div>';}document.getElementById('productList').innerHTML=html;}
 function saveProduct(){let name=document.getElementById('prodName').value.trim(),price=parseFloat(document.getElementById('prodPrice').value);if(!name||isNaN(price)||price<0)return alert('Masukkan nama & harga betul');if(editingId){let p=products.find(x=>x.id===editingId);if(p){p.name=name;p.price=price;}}else{let newId=products.length?Math.max(...products.map(p=>p.id))+1:1;products.push({id:newId,name:name,price:price});}localStorage.setItem('denyanya_products',JSON.stringify(products));renderProducts();renderProductList();editingId=null;document.getElementById('prodName').value='';document.getElementById('prodPrice').value='';alert('Berjaya!');}
 function editProduct(id){let p=products.find(x=>x.id===id);if(!p)return;editingId=id;document.getElementById('prodName').value=p.name;document.getElementById('prodPrice').value=p.price;}
