@@ -46,8 +46,9 @@ header h1 span{color:#E67E22}
 .numpad .btn-clear-num{background:#ffebee;color:#e74c3c}
 .btn-confirm{background:#27ae60;color:#fff;border:none;padding:15px;width:100%;border-radius:14px;font-size:1.05rem;font-weight:600}
 .btn-cancel{background:#f0f0f0;color:#555;border:none;padding:13px;width:100%;border-radius:14px;margin-top:8px}
-.qr-image{width:200px;height:200px;margin:8px auto 16px;display:flex;align-items:center;justify-content:center;border:2px dashed #ddd;border-radius:16px}
-.qr-image img{width:180px;height:180px}
+.qr-image{width:220px;height:220px;margin:8px auto 12px;display:flex;align-items:center;justify-content:center;border:2px dashed #ddd;border-radius:16px;background:#fafafa;overflow:hidden}
+.qr-image img{width:100%;height:100%;object-fit:contain}
+.btn-qr-change{background:#f5f0e8;color:#555;border:none;padding:10px 16px;border-radius:10px;font-size:.85rem;margin-bottom:12px}
 .summary-grid{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:16px}
 .summary-item{background:#FFF8F0;border-radius:12px;padding:10px 8px;text-align:center}
 .summary-item .label{font-size:.68rem;color:#888}
@@ -123,16 +124,20 @@ header h1 span{color:#E67E22}
     <button class="btn-confirm" onclick="confirmCashPayment()">Sahkan Pembayaran</button>
     <button class="btn-cancel" onclick="closeModal('cashModal')">Batal</button>
   </div>
-</div>
-<div class="modal" id="qrModal">
+</div><div class="modal" id="qrModal">
   <div class="modal-content">
     <h2>Bayar QR</h2>
     <div class="amount">Jumlah: RM <span id="qrTotal">0.00</span></div>
-    <div class="qr-image"><img src="https://api.qrserver.com/v1/create-qr-code/?size=200x200&data=DeNyaNya" alt="QR"></div>
+    <div class="qr-image" id="qrImageBox">
+      <img id="qrImg" src="https://api.qrserver.com/v1/create-qr-code/?size=200x200&data=DeNyaNya" alt="QR">
+    </div>
+    <input type="file" id="qrFileInput" accept="image/*" style="display:none" onchange="handleQRUpload(event)">
+    <button class="btn-qr-change" onclick="document.getElementById('qrFileInput').click()">Tukar QR</button>
     <button class="btn-confirm" onclick="confirmQRPayment()">Sahkan Pembayaran</button>
     <button class="btn-cancel" onclick="closeModal('qrModal')">Batal</button>
   </div>
-</div><div class="modal" id="historyModal">
+</div>
+<div class="modal" id="historyModal">
   <div class="modal-content" style="text-align:left">
     <h2>Sejarah Jualan</h2>
     <div class="summary-grid">
@@ -166,10 +171,29 @@ const defaultProducts=[{id:1,name:"Nasi Lemak",price:5},{id:2,name:"Mee Goreng",
 let products=JSON.parse(localStorage.getItem('denyanya_products')||'null');
 if(!products||!products.length)products=defaultProducts;
 let cart=[],editingId=null,currentTotal=0,cashInput='',deferredPrompt=null;
+const defaultQR='https://api.qrserver.com/v1/create-qr-code/?size=200x200&data=DeNyaNya';
 
 window.addEventListener('beforeinstallprompt',function(e){e.preventDefault();deferredPrompt=e;document.getElementById('installBanner').style.display='block';});
-function installApp(){if(!deferredPrompt){alert('Tekan menu Chrome (tiga titik) → Add to Home screen');return;}deferredPrompt.prompt();deferredPrompt.userChoice.then(function(c){if(c.outcome==='accepted')document.getElementById('installBanner').style.display='none';deferredPrompt=null;});}
+function installApp(){if(!deferredPrompt){alert('Tekan menu Chrome → Add to Home screen');return;}deferredPrompt.prompt();deferredPrompt.userChoice.then(function(c){if(c.outcome==='accepted')document.getElementById('installBanner').style.display='none';deferredPrompt=null;});}
 window.addEventListener('appinstalled',function(){document.getElementById('installBanner').style.display='none';deferredPrompt=null;});
+
+function loadQR(){
+  let saved=localStorage.getItem('denyanya_qr');
+  document.getElementById('qrImg').src=saved||defaultQR;
+}
+function handleQRUpload(e){
+  let file=e.target.files[0];
+  if(!file)return;
+  if(!file.type.startsWith('image/')){alert('Sila pilih gambar sahaja');return;}
+  let reader=new FileReader();
+  reader.onload=function(ev){
+    let base64=ev.target.result;
+    localStorage.setItem('denyanya_qr',base64);
+    document.getElementById('qrImg').src=base64;
+    alert('QR berjaya disimpan!');
+  };
+  reader.readAsDataURL(file);
+}
 
 function renderProducts(){let html='';for(let i=0;i<products.length;i++){let p=products[i];html+='<div class="product"><h3>'+p.name+'</h3><div class="price">RM '+p.price.toFixed(2)+'</div><button onclick="addToCart('+p.id+')">+ Tambah</button></div>';}document.getElementById('products').innerHTML=html;}
 function addToCart(id){let p=products.find(x=>x.id===id);if(!p)return;let e=cart.find(i=>i.id===id);if(e)e.qty++;else cart.push({id:p.id,name:p.name,price:p.price,qty:1});updateCart();}
@@ -180,7 +204,7 @@ function startCashPayment(){if(!cart.length)return alert('Cart kosong!');current
 function numpadPress(key){if(key==='C'){cashInput='';}else if(key==='.'){if(cashInput.indexOf('.')===-1)cashInput+=(cashInput===''?'0.':'.');}else{if(cashInput==='0')cashInput=key;else cashInput+=key;}if(cashInput.indexOf('.')>-1){let parts=cashInput.split('.');if(parts[1].length>2)cashInput=parts[0]+'.'+parts[1].substring(0,2);}document.getElementById('cashDisplay').textContent=cashInput||'0';updateChange();}
 function updateChange(){let r=parseFloat(cashInput)||0,ch=r-currentTotal;let box=document.getElementById('changeBox'),amt=document.getElementById('changeAmount');if(r>0){box.style.display='block';amt.textContent=ch>=0?'RM '+ch.toFixed(2):'Kurang RM '+Math.abs(ch).toFixed(2);amt.style.color=ch>=0?'#27ae60':'#e74c3c';}else box.style.display='none';}
 function confirmCashPayment(){let r=parseFloat(cashInput)||0;if(r<currentTotal)return alert('Wang tidak cukup!');saveSale('Cash',r);closeModal('cashModal');}
-function startQRPayment(){if(!cart.length)return alert('Cart kosong!');currentTotal=cart.reduce((s,i)=>s+i.price*i.qty,0);document.getElementById('qrTotal').textContent=currentTotal.toFixed(2);document.getElementById('qrModal').style.display='block';}
+function startQRPayment(){if(!cart.length)return alert('Cart kosong!');currentTotal=cart.reduce((s,i)=>s+i.price*i.qty,0);document.getElementById('qrTotal').textContent=currentTotal.toFixed(2);loadQR();document.getElementById('qrModal').style.display='block';}
 function confirmQRPayment(){saveSale('QR');closeModal('qrModal');}
 function saveSale(method,received){let sale={id:Date.now(),date:new Date().toLocaleString('ms-MY'),timestamp:Date.now(),method:method,items:cart.slice(),total:currentTotal,received:received||null};let sales=JSON.parse(localStorage.getItem('denyanya_sales')||'[]');sales.unshift(sale);localStorage.setItem('denyanya_sales',JSON.stringify(sales));let msg='Jualan berjaya!\nKaedah: '+method+'\nJumlah: RM '+currentTotal.toFixed(2);if(received)msg+='\nDiterima: RM '+received.toFixed(2)+'\nBaki: RM '+(received-currentTotal).toFixed(2);alert(msg);cart=[];updateCart();}
 function showHistory(){let sales=JSON.parse(localStorage.getItem('denyanya_sales')||'[]');let now=new Date(),todayStart=new Date(now.getFullYear(),now.getMonth(),now.getDate()).getTime(),monthStart=new Date(now.getFullYear(),now.getMonth(),1).getTime();let today=0,month=0,all=0,cash=0,qr=0,cashToday=0,qrToday=0;for(let i=0;i<sales.length;i++){let s=sales[i];all+=s.total;if(s.timestamp>=todayStart)today+=s.total;if(s.timestamp>=monthStart)month+=s.total;if(s.method==='Cash'){cash+=s.total;if(s.timestamp>=todayStart)cashToday+=s.total;}if(s.method==='QR'){qr+=s.total;if(s.timestamp>=todayStart)qrToday+=s.total;}}document.getElementById('sumToday').textContent='RM '+today.toFixed(2);document.getElementById('sumMonth').textContent='RM '+month.toFixed(2);document.getElementById('sumAll').textContent='RM '+all.toFixed(2);document.getElementById('sumCash').textContent='RM '+cash.toFixed(2);document.getElementById('sumQR').textContent='RM '+qr.toFixed(2);document.getElementById('sumCashToday').textContent='RM '+cashToday.toFixed(2);document.getElementById('sumQRToday').textContent='RM '+qrToday.toFixed(2);let groups={};for(let i=0;i<sales.length;i++){let s=sales[i];let d=new Date(s.timestamp);let key=d.getFullYear()+'-'+String(d.getMonth()+1).padStart(2,'0')+'-'+String(d.getDate()).padStart(2,'0');let label=d.toLocaleDateString('ms-MY',{weekday:'short',day:'numeric',month:'short',year:'numeric'});if(!groups[key])groups[key]={label:label,total:0,sales:[]};groups[key].total+=s.total;groups[key].sales.push(s);}let list=document.getElementById('historyList');let keys=Object.keys(groups).sort().reverse();if(!keys.length){list.innerHTML='<div class="empty">Belum ada jualan</div>';}else{let html='';for(let k=0;k<keys.length;k++){let g=groups[keys[k]];let salesHtml='';for(let j=0;j<g.sales.length;j++){let s=g.sales[j],items='';for(let m=0;m<s.items.length;m++)items+=s.items[m].name+' x'+s.items[m].qty+(m<s.items.length-1?', ':'');let time=new Date(s.timestamp).toLocaleTimeString('ms-MY',{hour:'2-digit',minute:'2-digit'});salesHtml+='<div class="sale-item"><div class="top"><div><strong>'+time+'</strong> • '+s.method+' • RM '+s.total.toFixed(2)+(s.received?'<br><small>Diterima: RM '+s.received.toFixed(2)+'</small>':'')+'<br><small>'+items+'</small></div><button class="btn-del" onclick="deleteSale('+s.id+')">Padam</button></div></div>';}html+='<div class="date-folder"><div class="date-header" onclick="toggleDate(this)"><span>'+g.label+' • RM '+g.total.toFixed(2)+'</span><span class="arrow">▶</span></div><div class="date-sales">'+salesHtml+'</div></div>';}list.innerHTML=html;}document.getElementById('historyModal').style.display='block';}
@@ -196,7 +220,8 @@ function closeModal(id){document.getElementById(id).style.display='none';}
 
 renderProducts();
 updateCart();
-if('serviceWorker' in navigator){window.addEventListener('load',function(){navigator.serviceWorker.register('./sw.js').then(function(reg){console.log('SW ok',reg);}).catch(function(err){console.log('SW fail',err);});});}
+loadQR();
+if('serviceWorker' in navigator){window.addEventListener('load',function(){navigator.serviceWorker.register('./sw.js').catch(function(){});});}
 </script>
 </body>
 </html>
